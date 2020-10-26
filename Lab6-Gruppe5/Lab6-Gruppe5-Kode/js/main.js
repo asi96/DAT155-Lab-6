@@ -74,9 +74,9 @@ async function main() {
 
     scene.add(directionalLight);
 
-    const heightmapImage = await Utilities.loadImage('resources/images/heightmap.png');
+    const heightmapImage = await Utilities.loadImage('resources/images/kitts.png');
 
-    const terrainGeometry = new TerrainBufferGeometry({ heightmapImage, width: 100, height: 20});
+    const terrainGeometry = new TerrainBufferGeometry({ heightmapImage, width: 500, height: 20});
 
     const texture1 = new TextureLoader().load('./resources/textures/grass_02.png');
 
@@ -92,12 +92,12 @@ async function main() {
 
     texture2.repeat.set(15, 15);
 
-    const splatMap = new TextureLoader().load('resources/images/splatmap_01.png');
+    const splatMap = new TextureLoader().load('resources/images/kitts.png');
 
     const terrainMaterial = new TextureSplattingMaterial({
         color: 0xffffff,
         shininess: 0,
-        textures: [texture2, texture1],
+        textures: [texture1, texture2],
         splatMaps: [splatMap]
     });
 

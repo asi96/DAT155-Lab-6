@@ -26,7 +26,7 @@ export default class TerrainBufferGeometry extends PlaneBufferGeometry {
 
             for (let i = 0; i < heightmapData.length; i++) {
 
-                this.attributes.position.setY(i, heightmapData[i] * height);
+                this.attributes.position.setY(i, heightmapData[i] * 50);
             }
 
         } else if (noiseFn !== null) {
