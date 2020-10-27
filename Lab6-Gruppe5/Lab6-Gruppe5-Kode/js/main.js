@@ -9,7 +9,7 @@ import {
     RepeatWrapping,
     DirectionalLight,
     Vector3,
-    AxesHelper, PlaneBufferGeometry, MeshBasicMaterial,
+    AxesHelper, PlaneBufferGeometry, MeshBasicMaterial, PlaneGeometry, DoubleSide,
 } from './lib/three.module.js';
 
 import Utilities from './lib/Utilities.js';
@@ -156,6 +156,16 @@ async function main() {
             console.error('Error loading model.', error);
         }
     );
+
+    //Water
+    var waterGeometry = new PlaneGeometry(512.0, 512.0, 16,16);
+    var waterMaterial = new MeshBasicMaterial({color: 0x0000ff, side: DoubleSide});
+    var waterPlane = new Mesh(waterGeometry, waterMaterial);
+    waterPlane.rotation.x = Math.PI / 2;
+    waterPlane.position.setY(1.0);
+    scene.add(waterPlane);
+
+    var frameBuffer = gl.createBuffer();
 
     /**
      * Set up camera controller:
