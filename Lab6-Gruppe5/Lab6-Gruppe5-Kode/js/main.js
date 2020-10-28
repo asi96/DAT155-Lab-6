@@ -185,7 +185,14 @@ async function main() {
 
     scene.add(waterPlane);
 
-
+    //lava
+    var lavageom = new PlaneGeometry(15,15,33,32);
+    var lavaMat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/lava.jpg')})
+    var lava = new Mesh(lavageom,lavaMat);
+    lava.rotation.x = - Math.PI / 2;
+    lava.rotation.z = Math.PI/6;
+    lava.position.set(-130, 34, -85)
+    scene.add(lava);
 
 
     /**
@@ -224,7 +231,8 @@ async function main() {
         backward: false,
         left: false,
         right: false,
-        speed: 0.01
+        speed: 0.01,
+        up: false
     };
 
     window.addEventListener('keydown', (e) => {
@@ -239,6 +247,15 @@ async function main() {
             e.preventDefault();
         } else if (e.code === 'KeyD') {
             move.right = true;
+            e.preventDefault();
+        } else if(e.code === 'KeyZ'){
+            move.speed +=0.05;
+            e.preventDefault();
+        }else if(e.code === 'KeyX'){
+            move.speed -=0.05;
+            e.preventDefault();
+        }else if(e.code === 'Space'){
+            move.up = true;
             e.preventDefault();
         }
     });
@@ -255,6 +272,9 @@ async function main() {
             e.preventDefault();
         } else if (e.code === 'KeyD') {
             move.right = false;
+            e.preventDefault();
+        }else if(e.code === 'Space'){
+            move.up = false;
             e.preventDefault();
         }
     });
@@ -285,6 +305,9 @@ async function main() {
 
         if (move.backward) {
             velocity.z += moveSpeed;
+        }
+        if(move.up){
+            velocity.y += moveSpeed;
         }
 
         // update controller rotation.
