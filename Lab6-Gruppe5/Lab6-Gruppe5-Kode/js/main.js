@@ -27,6 +27,7 @@ import TerrainBufferGeometry from './terrain/TerrainBufferGeometry.js';
 import { GLTFLoader } from './loaders/GLTFLoader.js';
 import { SimplexNoise } from './lib/SimplexNoise.js';
 import {LinearMipmapLinearFilter, RGBFormat, WebGLCubeRenderTarget} from "./lib/three.module.js";
+import {Sprite, SpriteMaterial} from "./lib/three.module.js";
 
 
 async function main() {
@@ -69,6 +70,8 @@ async function main() {
     camera.position.z = 70;
     camera.position.y = 55;
     camera.rotation.x -= Math.PI * 0.25;
+
+
 
 
     /**
@@ -195,6 +198,69 @@ async function main() {
     scene.add(lava);
 
 
+
+    //clouds
+    function generateBillboardClouds() {
+        for(var i = 0; i < 20; i++) {
+            var cloudtextures = [
+               new TextureLoader().load('resources/textures/clouds/c1.jpg'), //Laster inn noen skyteksturer
+                new TextureLoader().load('resources/textures/clouds/c2.jpg'),
+                new TextureLoader().load('resources/textures/clouds/c3.jpg'),
+                new TextureLoader().load('resources/textures/clouds/c4.jpg'),
+                new TextureLoader().load('resources/textures/clouds/c5.jpg')
+
+            ];
+
+
+            var randomTexture = Math.floor(Math.random() * 4);
+            var material = new SpriteMaterial({map: cloudtextures[randomTexture]});
+            var skyPlane = new Sprite(material);
+
+            //Positions- plasser litt tilfeldig
+            var pX = Math.random() * 2;
+            var pZ = Math.random() * 2;
+            var pY = Math.random() * 2;
+
+            var s1 = Math.random() * 2;
+            var s2 = Math.random() * 2;
+
+            //Set positions and scale
+            skyPlane.position.set(pX, pY, pZ);
+            skyPlane.scale.set(s1, s2, 1);
+            skyPlane.rotation.z = Math.PI / 2;
+
+            //Add to scene
+            scene.add(skyPlane);
+        }
+    }
+    generateBillboardClouds();
+
+    //smoke
+    var texture = new TextureLoader().load('resources/textures/smoke2.png');
+
+            const smokeGeo = new PlaneBufferGeometry(10, 10);
+
+            var smokeMaterial = new MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                opacity: 3.0,
+                side: DoubleSide
+            });
+
+            for (let p = 0, l = 100; p < l; p++) {
+                let particle = new Mesh(smokeGeo, smokeMaterial);
+
+                particle.position.set(
+                    Math.random() * 10 - 140,
+                    Math.random() * 100 + 34,
+                    Math.random()* 10 - 90
+                );
+
+                //particle.rotation.z = Math.random() * 360;
+                scene.add(particle);
+            };
+
+
     /**
      * Set up camera controller:
      */
@@ -319,6 +385,7 @@ async function main() {
         velocity.applyQuaternion(camera.quaternion);
         camera.position.add(velocity);
         // render scene:
+
         renderer.render(scene, camera);
         /*
         waterPlane.visible = false;
