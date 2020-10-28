@@ -9,7 +9,14 @@ import {
     RepeatWrapping,
     DirectionalLight,
     Vector3,
-    AxesHelper, PlaneBufferGeometry, MeshBasicMaterial, PlaneGeometry, DoubleSide,
+    AxesHelper,
+    PlaneBufferGeometry,
+    MeshBasicMaterial,
+    PlaneGeometry,
+    DoubleSide,
+    CubeCamera,
+    BackSide,
+    MeshLambertMaterial
 } from './lib/three.module.js';
 
 import Utilities from './lib/Utilities.js';
@@ -19,6 +26,8 @@ import TextureSplattingMaterial from './materials/TextureSplattingMaterial.js';
 import TerrainBufferGeometry from './terrain/TerrainBufferGeometry.js';
 import { GLTFLoader } from './loaders/GLTFLoader.js';
 import { SimplexNoise } from './lib/SimplexNoise.js';
+import {LinearMipmapLinearFilter, RGBFormat, WebGLCubeRenderTarget} from "./lib/three.module.js";
+
 
 async function main() {
 
@@ -158,14 +167,26 @@ async function main() {
     );
 
     //Water
-    var waterGeometry = new PlaneGeometry(512.0, 512.0, 16,16);
-    var waterMaterial = new MeshBasicMaterial({color: 0x0000ff, side: DoubleSide});
+    //var cubeRenderTarget = new WebGLCubeRenderTarget( 128, { format: RGBFormat, generateMipmaps: true, minFilter: LinearMipmapLinearFilter } );
+    var waterGeometry = new PlaneGeometry(512.0, 512.0, 56,56);
+    //var cubeCamera = new Cam Camera(1,100000,  cubeRenderTarget);
+    //scene.add(cubeCamera);
+
+    //envMap: cubeCamera.renderTarget.texture
+    var waterMaterial = new MeshPhongMaterial({map: new TextureLoader().load( 'resources/textures/water.jpg' )
+    });
+    //waterMaterial.envMap = cubeCamera.renderTarget.texture;
     var waterPlane = new Mesh(waterGeometry, waterMaterial);
-    waterPlane.rotation.x = Math.PI / 2;
+    //waterPlane.animate()
+
+    waterPlane.rotation.x = - Math.PI / 2;
     waterPlane.position.setY(1.0);
+
+
     scene.add(waterPlane);
 
-    var frameBuffer = gl.createBuffer();
+
+
 
     /**
      * Set up camera controller:
@@ -274,11 +295,18 @@ async function main() {
         // apply rotation to velocity vector, and translate moveNode with it.
         velocity.applyQuaternion(camera.quaternion);
         camera.position.add(velocity);
-
         // render scene:
         renderer.render(scene, camera);
+        /*
+        waterPlane.visible = false;
+        cubeCamera.position.copy( camera.position );
+        cubeCamera.position.setY(0.5);
 
+        cubeCamera.update(renderer, scene);
+        waterPlane.visible = true;
+        */
         requestAnimationFrame(loop);
+
 
     };
 
