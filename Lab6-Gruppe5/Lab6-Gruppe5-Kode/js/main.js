@@ -201,8 +201,8 @@ async function main() {
 
     //clouds
     function generateBillboardClouds() {
-        for(var i = 0; i < 20; i++) {
-            var cloudtextures = [
+        for(var i = 0; i < 100; i++) {
+            /*var cloudtextures = [
                new TextureLoader().load('resources/textures/clouds/c1.jpg'), //Laster inn noen skyteksturer
                 new TextureLoader().load('resources/textures/clouds/c2.jpg'),
                 new TextureLoader().load('resources/textures/clouds/c3.jpg'),
@@ -210,24 +210,30 @@ async function main() {
                 new TextureLoader().load('resources/textures/clouds/c5.jpg')
 
             ];
-
+            */
+            var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
 
             var randomTexture = Math.floor(Math.random() * 4);
-            var material = new SpriteMaterial({map: cloudtextures[randomTexture]});
+            var material = new SpriteMaterial({
+                map: cloudtexture,
+                transparent: true,
+                opacity: 3.0,
+                side: DoubleSide
+            });
             var skyPlane = new Sprite(material);
 
             //Positions- plasser litt tilfeldig
-            var pX = Math.random() * 2;
-            var pZ = Math.random() * 2;
-            var pY = Math.random() * 2;
+            var pX = Math.random() * 1000 - 500;
+            var pZ = Math.random() * 1000 - 500;
+            var pY = Math.random() * 50 + 100;
 
-            var s1 = Math.random() * 2;
-            var s2 = Math.random() * 2;
+            var s1 = 50;
+            var s2 = 50;
 
             //Set positions and scale
             skyPlane.position.set(pX, pY, pZ);
-            skyPlane.scale.set(s1, s2, 1);
-            skyPlane.rotation.z = Math.PI / 2;
+            skyPlane.scale.set(s1, s2);
+
 
             //Add to scene
             scene.add(skyPlane);
@@ -238,9 +244,8 @@ async function main() {
     //smoke
     var texture = new TextureLoader().load('resources/textures/smoke2.png');
 
-            const smokeGeo = new PlaneBufferGeometry(10, 10);
 
-            var smokeMaterial = new MeshBasicMaterial({
+            var smokeMaterial = new SpriteMaterial({
                 map: texture,
                 transparent: true,
                 opacity: 3.0,
@@ -248,13 +253,17 @@ async function main() {
             });
 
             for (let p = 0, l = 100; p < l; p++) {
-                let particle = new Mesh(smokeGeo, smokeMaterial);
+                let particle = new Sprite(smokeMaterial);
 
                 particle.position.set(
-                    Math.random() * 10 - 140,
-                    Math.random() * 100 + 34,
-                    Math.random()* 10 - 90
+                    Math.random() * 20 - 140,
+                    Math.random() * 100 + 50,
+                    Math.random()* 20 - 90
                 );
+                particle.scale.set(
+                    20,
+                    20
+                )
 
                 //particle.rotation.z = Math.random() * 360;
                 scene.add(particle);
