@@ -243,7 +243,7 @@ async function main() {
 
     //smoke
     var texture = new TextureLoader().load('resources/textures/smoke2.png');
-
+            var smokeArray = new Array();
 
             var smokeMaterial = new SpriteMaterial({
                 map: texture,
@@ -264,12 +264,20 @@ async function main() {
                     20,
                     20
                 )
+                smokeArray.push(particle);
 
                 //particle.rotation.z = Math.random() * 360;
                 scene.add(particle);
             };
 
-
+    function animateSmoke(){
+       for (let i = 0, l = 100; i<l; i++){
+           smokeArray[i].position.setY(smokeArray[i].position.y + 0.05);
+           if(smokeArray[i].position.y > 150){
+               smokeArray[i].position.setY(45);
+           }
+       }
+    }
     /**
      * Set up camera controller:
      */
@@ -394,7 +402,7 @@ async function main() {
         velocity.applyQuaternion(camera.quaternion);
         camera.position.add(velocity);
         // render scene:
-
+        animateSmoke();
         renderer.render(scene, camera);
         /*
         waterPlane.visible = false;
@@ -410,6 +418,7 @@ async function main() {
     };
 
     loop(performance.now());
+
 
 }
 
