@@ -30,6 +30,7 @@ import { GLTFLoader } from './loaders/GLTFLoader.js';
 import { SimplexNoise } from './lib/SimplexNoise.js';
 import {LinearMipmapLinearFilter, RGBFormat, WebGLCubeRenderTarget} from "./lib/three.module.js";
 import {Sprite, SpriteMaterial} from "./lib/three.module.js";
+import {winterWonderland} from "./winterWonderland/winterWonderland.js";
 
 
 async function main() {
@@ -269,7 +270,11 @@ async function main() {
             var pX = Math.random() * 1000 - 500;
             var pZ = Math.random() * 1000 - 500;
             var pY = Math.random() * 50 + 100;
-
+            if(i < 2){
+                pX = 185;
+                pY = 100;
+                pZ = 185;
+            }
             var s1 = 50;
             var s2 = 50;
 
@@ -286,7 +291,7 @@ async function main() {
 
     //smoke
     var texture = new TextureLoader().load('resources/textures/smoke2.png');
-
+            var smokeArray = new Array();
 
             var smokeMaterial = new SpriteMaterial({
                 map: texture,
@@ -307,10 +312,66 @@ async function main() {
                     20,
                     20
                 )
+                smokeArray.push(particle);
 
                 //particle.rotation.z = Math.random() * 360;
                 scene.add(particle);
             };
+
+    function animateSmoke(){
+       for (let i = 0, l = 100; i<l; i++){
+           smokeArray[i].position.setY(smokeArray[i].position.y + 0.05);
+           if(smokeArray[i].position.y > 150){
+               smokeArray[i].position.setY(45);
+           }
+       }
+    }
+
+
+        var icegeo = new PlaneGeometry(24, 24, 32, 32);
+        var icemat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/iceTexture.jpg')});
+        var ice = new Mesh(icegeo, icemat);
+        ice.rotation.x = - Math.PI/2;
+        ice.position.set(188, 1.5, 178);
+        scene.add(ice);
+
+        var snowArray = new Array();
+        var texture = new TextureLoader().load('resources/textures/snowTexture.png');
+        var snowMaterial = new SpriteMaterial({
+            map: texture,
+            transparent: true,
+            opacity: 3.0,
+            side: DoubleSide
+        });
+        for(let i = 0, l = 100; i < l; i++) {
+
+            let particle = new Sprite(snowMaterial);
+
+            particle.position.set(
+                Math.random() * 20 + 175,
+                Math.random() * 90 + 2,
+                Math.random() * 20 + 175
+            );
+            particle.scale.set(
+                10,
+                10
+            );
+            snowArray.push(particle);
+            scene.add(particle);
+        }
+
+
+    function animateSnow(){
+        for (let i = 0, l = 100; i<l; i++){
+            snowArray[i].position.setX(snowArray[i].position.x + ((Math.random()/10) - 0.05));
+            snowArray[i].position.setY(snowArray[i].position.y - (Math.random()/10));
+            snowArray[i].position.setZ(snowArray[i].position.z + ((Math.random()/10) - 0.05));
+            if(snowArray[i].position.y < 5){
+                snowArray[i].position.set(Math.random() * 20 + 175, 80, Math.random() * 20 + 175);
+            }
+        }
+    }
+
 
 
     /**
@@ -441,7 +502,8 @@ async function main() {
         water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
 
         // render scene:
-
+        animateSmoke();
+        animateSnow();
         renderer.render(scene, camera);
         /*
         waterPlane.visible = false;
@@ -457,6 +519,7 @@ async function main() {
     };
 
     loop(performance.now());
+
 
 }
 
