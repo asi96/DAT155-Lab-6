@@ -331,7 +331,7 @@ async function main() {
         var icemat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/iceTexture.jpg')});
         var ice = new Mesh(icegeo, icemat);
         ice.rotation.x = - Math.PI/2;
-        ice.position.set(188, 1.5, 178);
+        ice.position.set(188, 2.2, 178);
         scene.add(ice);
 
         var snowArray = new Array();
