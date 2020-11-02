@@ -30,7 +30,6 @@ import { GLTFLoader } from './loaders/GLTFLoader.js';
 import { SimplexNoise } from './lib/SimplexNoise.js';
 import {LinearMipmapLinearFilter, RGBFormat, WebGLCubeRenderTarget} from "./lib/three.module.js";
 import {Sprite, SpriteMaterial} from "./lib/three.module.js";
-import {winterWonderland} from "./winterWonderland/winterWonderland.js";
 
 
 async function main() {
