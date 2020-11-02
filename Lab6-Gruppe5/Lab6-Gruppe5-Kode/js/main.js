@@ -16,8 +16,10 @@ import {
     DoubleSide,
     CubeCamera,
     BackSide,
-    MeshLambertMaterial
+    MeshLambertMaterial, MeshFaceMaterial, ObjectLoader
 } from './lib/three.module.js';
+
+import {Water} from '../js/objects/Water.js';
 
 import Utilities from './lib/Utilities.js';
 import MouseLookController from './controls/MouseLookController.js';
@@ -87,9 +89,9 @@ async function main() {
 
     scene.add(directionalLight);
 
-    const heightmapImage = await Utilities.loadImage('resources/images/kitts.png');
+    const heightmapImage = await Utilities.loadImage('resources/images/kitts_experiment.png');
 
-    const terrainGeometry = new TerrainBufferGeometry({ heightmapImage, width: 500, height: 20});
+    const terrainGeometry = new TerrainBufferGeometry({ heightmapImage, width: 500, height: 50});
 
     const texture1 = new TextureLoader().load('./resources/textures/grass_02.png');
 
@@ -98,20 +100,27 @@ async function main() {
 
     texture1.repeat.set(50, 50);
 
-    const texture2 = new TextureLoader().load('./resources/textures/snowy_rock_01.png');
+    const texture2 = new TextureLoader().load('./resources/textures/rock_01.png');
 
     texture2.wrapS = RepeatWrapping;
     texture2.wrapT = RepeatWrapping;
 
     texture2.repeat.set(15, 15);
 
-    const splatMap = new TextureLoader().load('resources/images/kitts.png');
+    const texture3 = new TextureLoader().load('./resources/textures/sand2.png');
+
+    texture3.wrapS = RepeatWrapping;
+    texture3.wrapT = RepeatWrapping;
+
+    const splatMap = new TextureLoader().load('resources/images/kitts_experiment2.png');
+
+    const splatMapSand = new TextureLoader().load('resources/images/kitts_sand_splat_final.png');
 
     const terrainMaterial = new TextureSplattingMaterial({
         color: 0xffffff,
         shininess: 0,
-        textures: [texture1, texture2],
-        splatMaps: [splatMap]
+        textures: [texture2, texture1, texture3],
+        splatMaps: [splatMap, splatMapSand]
     });
 
     const terrain = new Mesh(terrainGeometry, terrainMaterial);
@@ -123,13 +132,16 @@ async function main() {
      */
 
     const loader = new GLTFLoader();
+    const palmtreeTex = new TextureLoader().load('resources/models/palmtree.jpg');
+    const palmtreeMat = new MeshPhongMaterial({map: palmtreeTex});
+
     loader.load(
         // resource URL
-        'resources/models/kenney_nature_kit/tree_thin.glb',
+        'resources/models/palmtree.gltf',
         // called when resource is loaded
         (object) => {
-            for (let x = -50; x < 50; x += 8) {
-                for (let z = -50; z < 50; z += 8) {
+            for (let x = -2000; x < 2000; x += 8) {
+                for (let z = -2000; z < 2000; z += 8) {
                     
                     // TODO: Uncomment this once you've implemented the terrain.
 
@@ -138,13 +150,14 @@ async function main() {
 
                      const height = terrainGeometry.getHeightAt(px, pz);
 
-                     if (height < 5) {
+                     if (height < 8 && height > 4) {
                          const tree = object.scene.children[0].clone();
 
                          tree.traverse((child) => {
                              if (child.isMesh) {
                                  child.castShadow = true;
                                  child.receiveShadow = true;
+                                 child.material = palmtreeMat;
                              }
                          });
 
@@ -152,9 +165,10 @@ async function main() {
                          tree.position.y = height - 0.01;
                          tree.position.z = pz;
 
-                         tree.rotation.y = Math.random() * (2 * Math.PI);
+                         //tree.rotation.y = Math.random() * (2 * Math.PI);
 
-                         tree.scale.multiplyScalar(1.5 + Math.random() * 1);
+
+                         tree.scale.multiplyScalar((1.5 + Math.random() * 1) * 0.003);
 
                          scene.add(tree);
                      }
@@ -170,32 +184,61 @@ async function main() {
         }
     );
 
-    //Water
+    //Water - Gammel
     //var cubeRenderTarget = new WebGLCubeRenderTarget( 128, { format: RGBFormat, generateMipmaps: true, minFilter: LinearMipmapLinearFilter } );
-    var waterGeometry = new PlaneGeometry(512.0, 512.0, 56,56);
+    //var waterGeometry = new PlaneGeometry(512.0, 512.0, 56,56);
     //var cubeCamera = new Cam Camera(1,100000,  cubeRenderTarget);
     //scene.add(cubeCamera);
 
     //envMap: cubeCamera.renderTarget.texture
-    var waterMaterial = new MeshPhongMaterial({map: new TextureLoader().load( 'resources/textures/water.jpg' )
-    });
+    //var waterMaterial = new MeshPhongMaterial({map: new TextureLoader().load( 'resources/textures/waternormals.jpg' )
+    //});
     //waterMaterial.envMap = cubeCamera.renderTarget.texture;
-    var waterPlane = new Mesh(waterGeometry, waterMaterial);
+    //var waterPlane = new Mesh(waterGeometry, waterMaterial);
     //waterPlane.animate()
 
-    waterPlane.rotation.x = - Math.PI / 2;
-    waterPlane.position.setY(1.0);
+    //waterPlane.rotation.x = - Math.PI / 2;
+    //waterPlane.position.setY(1.0);
 
 
-    scene.add(waterPlane);
+    //scene.add(waterPlane);
+
+    // Water
+
+    const waterGeometry = new PlaneBufferGeometry( 512, 512, 56,56 );
+
+    let water = new Water(
+        waterGeometry,
+        {
+            textureWidth: 512,
+            textureHeight: 512,
+            waterNormals: new TextureLoader().load( 'resources/textures/waternormals.jpg', function ( texture ) {
+
+                texture.wrapS = texture.wrapT = RepeatWrapping;
+
+            } ),
+            alpha: 1.0,
+            sunDirection: new Vector3(),
+            sunColor: 0xffffff,
+            waterColor: 0x001e0f,
+            distortionScale: 3.7,
+            fog: scene.fog !== undefined
+        }
+    );
+
+    water.rotation.x = - Math.PI / 2;
+
+    water.position.setY(2);
+
+    scene.add( water );
 
     //lava
-    var lavageom = new PlaneGeometry(15,15,32,32);
-    var lavaMat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/lava.jpg')})
+    var lavageom = new PlaneGeometry(15,15,33,32);
+    var lavaMat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/lava.png')})
     var lava = new Mesh(lavageom,lavaMat);
     lava.rotation.x = - Math.PI / 2;
     lava.rotation.z = Math.PI/6;
-    lava.position.set(-130, 34, -85)
+    lava.position.set(-130, 35, -85)
     scene.add(lava);
 
 
@@ -423,7 +466,7 @@ async function main() {
         const delta = now - then;
         then = now;
 
-        const moveSpeed = move.speed * delta;
+        const moveSpeed = move.speed * delta + 3;
 
         velocity.set(0.0, 0.0, 0.0);
 
@@ -454,6 +497,10 @@ async function main() {
         // apply rotation to velocity vector, and translate moveNode with it.
         velocity.applyQuaternion(camera.quaternion);
         camera.position.add(velocity);
+
+        // Apply rotation to water
+        water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
+
         // render scene:
         animateSmoke();
         animateSnow();

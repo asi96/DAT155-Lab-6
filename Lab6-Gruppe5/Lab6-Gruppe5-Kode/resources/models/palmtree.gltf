@@ -1,0 +1,184 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "gltfeditor.com"
+  },
+  "buffers": [
+    {
+      "uri": "palmtree.bin",
+      "byteLength": 2232552
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 474552,
+      "byteOffset": 0,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 474552,
+      "byteOffset": 474552,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 474552,
+      "byteOffset": 949104,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 808896,
+      "byteOffset": 1423656,
+      "target": 34963
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "normalized": false,
+      "count": 39546,
+      "max": [
+        267.3504943847656,
+        218.41220092773438,
+        763.268798828125
+      ],
+      "min": [
+        -198.2711944580078,
+        -251.36480712890625,
+        -2.54259991645813
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "normalized": false,
+      "count": 39546,
+      "max": [
+        1,
+        0.9999792575836182,
+        0.9999914169311523
+      ],
+      "min": [
+        -0.9999948740005493,
+        -0.9999929666519165,
+        -0.999998927116394
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "normalized": false,
+      "count": 39546,
+      "max": [
+        0.9997000098228455,
+        0.9987000226974487,
+        5.452000141143799
+      ],
+      "min": [
+        0.00009999999747378752,
+        0.000299990177154541,
+        0
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "byteOffset": 0,
+      "componentType": 5125,
+      "normalized": false,
+      "count": 202224,
+      "max": [
+        39545
+      ],
+      "min": [
+        0
+      ],
+      "type": "SCALAR"
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        1
+      ],
+      "name": "palmtree"
+    }
+  ],
+  "nodes": [
+    {
+      "name": "10446_Palm_Tree_v1_SG",
+      "mesh": 0
+    },
+    {
+      "name": "input.obj",
+      "children": [
+        0
+      ],
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        3.422854177870249e-8,
+        -0.9999999403953552,
+        0,
+        0,
+        0.9999999403953552,
+        3.422854177870249e-8,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "material": 0,
+          "mode": 4,
+          "indices": 3
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.6,
+          0.6,
+          0.6,
+          1
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 1
+      },
+      "emissiveFactor": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": false
+    }
+  ]
+}
