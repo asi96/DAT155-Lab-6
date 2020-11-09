@@ -16,7 +16,7 @@ import {
     DoubleSide,
     CubeCamera,
     BackSide,
-    MeshLambertMaterial, MeshFaceMaterial, ObjectLoader
+    MeshLambertMaterial, MeshFaceMaterial, ObjectLoader, Fog, PointLight, AmbientLight
 } from './lib/three.module.js';
 
 import {Water} from '../js/objects/Water.js';
@@ -30,21 +30,63 @@ import { GLTFLoader } from './loaders/GLTFLoader.js';
 import { SimplexNoise } from './lib/SimplexNoise.js';
 import {LinearMipmapLinearFilter, RGBFormat, WebGLCubeRenderTarget} from "./lib/three.module.js";
 import {Sprite, SpriteMaterial} from "./lib/three.module.js";
+import {SphereGeometry} from "./lib/three.module.js";
+import {FogExp2} from "./lib/three.module.js";
+import {Object3D} from "./lib/three.module.js";
+import {Group} from "./lib/three.module.js";
 
 
 async function main() {
 
     const scene = new Scene();
 
-    const axesHelper = new AxesHelper(15);
-    scene.add(axesHelper);
+    let center = new Object3D();
 
-    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    scene.add(center);
+
+    // const axesHelper = new AxesHelper(15);
+    // scene.add(axesHelper);
+
+    /**
+     * Add a orbit node in the middle of the scene for the sun to rotate around
+     */
+    let centerOrbitNode = new Object3D();
+
+    /**
+     * Add a sun sphere and move it up
+     */
+    let sunGeometry = new SphereGeometry(30, 64, 64);
+    let sunMaterial = new MeshPhongMaterial({color: 'yellow', emissive: '#F8CE3B'});
+    let sun = new Mesh(sunGeometry, sunMaterial);
+    sun.position.y = 1000;
+
+    /**
+     * Add a moon sphere and move it down
+     */
+    let moonGeometry = new SphereGeometry(30, 64, 64);
+    let moonMaterial = new MeshPhongMaterial({shininess: 1.0, emissive: '#FFF'});
+    let moon = new Mesh(moonGeometry, moonMaterial);
+    moon.position.y = -1000;
+
+    /**
+     * Add both moon and sun to the orbitnode and group it all up into a lightGroup
+     */
+    centerOrbitNode.add(sun);
+    centerOrbitNode.add(moon);
+
+    const lightGroup = new Group();
+    lightGroup.add(centerOrbitNode);
+
+    scene.add(lightGroup);
+
+
+    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
 
     const renderer = new WebGLRenderer({ antialias: true });
     renderer.setClearColor(0xffffff);
     renderer.setSize(window.innerWidth, window.innerHeight);
 
+    // Enabling shadow mapping
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
 
@@ -84,9 +126,11 @@ async function main() {
      * We are using the async/await language constructs of Javascript:
      *  - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function
      */
-    const directionalLight = new DirectionalLight(0xffffff, 1.0);
+    const sunLight = new PointLight(0xfdfbd3, 1.0);
+    const moonLight = new PointLight(0xffffff, 0.0);
 
-    scene.add(directionalLight);
+    sun.add(sunLight);
+    moon.add(moonLight);
 
     const heightmapImage = await Utilities.loadImage('resources/images/kitts_experiment.png');
 
@@ -183,34 +227,14 @@ async function main() {
         }
     );
 
-    //Water - Gammel
-    //var cubeRenderTarget = new WebGLCubeRenderTarget( 128, { format: RGBFormat, generateMipmaps: true, minFilter: LinearMipmapLinearFilter } );
-    //var waterGeometry = new PlaneGeometry(512.0, 512.0, 56,56);
-    //var cubeCamera = new Cam Camera(1,100000,  cubeRenderTarget);
-    //scene.add(cubeCamera);
-
-    //envMap: cubeCamera.renderTarget.texture
-    //var waterMaterial = new MeshPhongMaterial({map: new TextureLoader().load( 'resources/textures/waternormals.jpg' )
-    //});
-    //waterMaterial.envMap = cubeCamera.renderTarget.texture;
-    //var waterPlane = new Mesh(waterGeometry, waterMaterial);
-    //waterPlane.animate()
-
-    //waterPlane.rotation.x = - Math.PI / 2;
-    //waterPlane.position.setY(1.0);
-
-
-    //scene.add(waterPlane);
-
     // Water
-
-    const waterGeometry = new PlaneBufferGeometry( 512, 512, 56,56 );
+    const waterGeometry = new PlaneBufferGeometry( 2000, 2000, 56,56 );
 
     let water = new Water(
         waterGeometry,
         {
-            textureWidth: 512,
-            textureHeight: 512,
+            textureWidth: 2000,
+            textureHeight: 2000,
             waterNormals: new TextureLoader().load( 'resources/textures/waternormals.jpg', function ( texture ) {
 
                 texture.wrapS = texture.wrapT = RepeatWrapping;
@@ -371,7 +395,37 @@ async function main() {
         }
     }
 
+    /**
+     * Create a skybox out of a sphere which we put in the middle
+     * and then draw from the 'inside-out'
+     */
+    let sphereGeometry = new SphereGeometry(1000, 64, 64);
+    let skyTexture = new TextureLoader().load('resources/textures/sky.png');
+    let sphereMaterial = new MeshPhongMaterial( {map: skyTexture, color: 0x87ceeb, side: BackSide});
+    let skyBox = new Mesh(sphereGeometry, sphereMaterial);
 
+    scene.add(skyBox);
+
+    /**
+     * Helper-function called every frame to disable/enable the sun/moon
+     * when they 'collide' with the water
+     */
+    function lightCheck() {
+        if(sun.getWorldPosition(center.position).y <= -50) {
+            sun.visible = false;
+            sunLight.intensity = 0.0;
+
+            moon.visible = true;
+            moonLight.intensity = 0.4;
+
+        } else {
+            sun.visible = true;
+            sunLight.intensity = 1.0;
+
+            moon.visible = false;
+            moonLight.intensity = 0.0;
+        }
+    }
 
     /**
      * Set up camera controller:
@@ -465,6 +519,8 @@ async function main() {
         const delta = now - then;
         then = now;
 
+        lightCheck();
+
         const moveSpeed = move.speed * delta + 3;
 
         velocity.set(0.0, 0.0, 0.0);
@@ -500,21 +556,16 @@ async function main() {
         // Apply rotation to water
         water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
 
-        // render scene:
+        // Apply rotation to the orbit node for the sun and moon
+        centerOrbitNode.rotation.x += 0.0025;
+
         animateSmoke();
         animateSnow();
+
+        // render scene:
         renderer.render(scene, camera);
-        /*
-        waterPlane.visible = false;
-        cubeCamera.position.copy( camera.position );
-        cubeCamera.position.setY(0.5);
 
-        cubeCamera.update(renderer, scene);
-        waterPlane.visible = true;
-        */
         requestAnimationFrame(loop);
-
-
     };
 
     loop(performance.now());
