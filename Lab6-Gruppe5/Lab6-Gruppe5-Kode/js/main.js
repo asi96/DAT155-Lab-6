@@ -227,7 +227,10 @@ async function main() {
         }
     );
 
-    // Water
+    /**
+     * Water
+     * Adds a water plane to the scene from the Water.js class
+     */
     const waterGeometry = new PlaneBufferGeometry( 2000, 2000, 56,56 );
 
     let water = new Water(
@@ -255,9 +258,12 @@ async function main() {
 
     scene.add( water );
 
-    //lava
+    /**
+     * Lava
+     * Adds a lava plane to the scene in the crater
+     */
     var lavageom = new PlaneGeometry(15,15,33,32);
-    var lavaMat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/lava.png')})
+    var lavaMat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/lava.png'), emissive: 0xFF0000})
     var lava = new Mesh(lavageom,lavaMat);
     lava.rotation.x = - Math.PI / 2;
     lava.rotation.z = Math.PI/6;
