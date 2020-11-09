@@ -58,7 +58,7 @@ async function main() {
     let sunGeometry = new SphereGeometry(30, 64, 64);
     let sunMaterial = new MeshPhongMaterial({color: 'yellow', emissive: '#F8CE3B'});
     let sun = new Mesh(sunGeometry, sunMaterial);
-    sun.position.y = 1000;
+    sun.position.y = 1500;
 
     /**
      * Add a moon sphere and move it down
@@ -66,7 +66,7 @@ async function main() {
     let moonGeometry = new SphereGeometry(30, 64, 64);
     let moonMaterial = new MeshPhongMaterial({shininess: 1.0, emissive: '#FFF'});
     let moon = new Mesh(moonGeometry, moonMaterial);
-    moon.position.y = -1000;
+    moon.position.y = -1500;
 
     /**
      * Add both moon and sun to the orbitnode and group it all up into a lightGroup
@@ -80,7 +80,7 @@ async function main() {
     scene.add(lightGroup);
 
 
-    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
+    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 6000);
 
     const renderer = new WebGLRenderer({ antialias: true });
     renderer.setClearColor(0xffffff);
@@ -231,13 +231,13 @@ async function main() {
      * Water
      * Adds a water plane to the scene from the Water.js class
      */
-    const waterGeometry = new PlaneBufferGeometry( 2000, 2000, 56,56 );
+    const waterGeometry = new PlaneBufferGeometry( 3000, 3000, 56,56 );
 
     let water = new Water(
         waterGeometry,
         {
-            textureWidth: 2000,
-            textureHeight: 2000,
+            textureWidth: 3000,
+            textureHeight: 3000,
             waterNormals: new TextureLoader().load( 'resources/textures/waternormals.jpg', function ( texture ) {
 
                 texture.wrapS = texture.wrapT = RepeatWrapping;
@@ -262,9 +262,9 @@ async function main() {
      * Lava
      * Adds a lava plane to the scene in the crater
      */
-    var lavageom = new PlaneGeometry(15,15,33,32);
-    var lavaMat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/lava.png'), emissive: 0xFF0000})
-    var lava = new Mesh(lavageom,lavaMat);
+    let lavageom = new PlaneGeometry(15,15,33,32);
+    let lavaMat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/lava.png'), emissive: 0xFF0000})
+    let lava = new Mesh(lavageom,lavaMat);
     lava.rotation.x = - Math.PI / 2;
     lava.rotation.z = Math.PI/6;
     lava.position.set(-130, 35, -85)
@@ -274,7 +274,7 @@ async function main() {
 
     //clouds
     function generateBillboardClouds() {
-        for(var i = 0; i < 100; i++) {
+        for(let i = 0; i < 100; i++) {
             /*var cloudtextures = [
                new TextureLoader().load('resources/textures/clouds/c1.jpg'), //Laster inn noen skyteksturer
                 new TextureLoader().load('resources/textures/clouds/c2.jpg'),
@@ -284,28 +284,28 @@ async function main() {
 
             ];
             */
-            var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
+            let cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
 
-            var randomTexture = Math.floor(Math.random() * 4);
-            var material = new SpriteMaterial({
+            let randomTexture = Math.floor(Math.random() * 4);
+            let material = new SpriteMaterial({
                 map: cloudtexture,
                 transparent: true,
                 opacity: 3.0,
                 side: DoubleSide
             });
-            var skyPlane = new Sprite(material);
+            let skyPlane = new Sprite(material);
 
             //Positions- plasser litt tilfeldig
-            var pX = Math.random() * 1000 - 500;
-            var pZ = Math.random() * 1000 - 500;
-            var pY = Math.random() * 50 + 100;
+            let pX = Math.random() * 1000 - 500;
+            let pZ = Math.random() * 1000 - 500;
+            let pY = Math.random() * 50 + 100;
             if(i < 2){
                 pX = 185;
                 pY = 100;
                 pZ = 185;
             }
-            var s1 = 50;
-            var s2 = 50;
+            let s1 = 50;
+            let s2 = 50;
 
             //Set positions and scale
             skyPlane.position.set(pX, pY, pZ);
@@ -319,11 +319,11 @@ async function main() {
     generateBillboardClouds();
 
     //smoke
-    var texture = new TextureLoader().load('resources/textures/smoke2.png');
-            var smokeArray = new Array();
+    let textureSmoke = new TextureLoader().load('resources/textures/smoke2.png');
+            let smokeArray = new Array();
 
-            var smokeMaterial = new SpriteMaterial({
-                map: texture,
+            let smokeMaterial = new SpriteMaterial({
+                map: textureSmoke,
                 transparent: true,
                 opacity: 3.0,
                 side: DoubleSide
@@ -357,17 +357,17 @@ async function main() {
     }
 
 
-        var icegeo = new PlaneGeometry(24, 24, 32, 32);
-        var icemat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/iceTexture.jpg')});
-        var ice = new Mesh(icegeo, icemat);
+        let icegeo = new PlaneGeometry(24, 24, 32, 32);
+        let icemat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/iceTexture.jpg')});
+        let ice = new Mesh(icegeo, icemat);
         ice.rotation.x = - Math.PI/2;
         ice.position.set(188, 2.2, 178);
         scene.add(ice);
 
-        var snowArray = new Array();
-        var texture = new TextureLoader().load('resources/textures/snowTexture.png');
-        var snowMaterial = new SpriteMaterial({
-            map: texture,
+        let snowArray = new Array();
+        let textureSnow = new TextureLoader().load('resources/textures/snowTexture.png');
+        let snowMaterial = new SpriteMaterial({
+            map: textureSnow,
             transparent: true,
             opacity: 3.0,
             side: DoubleSide
@@ -405,7 +405,7 @@ async function main() {
      * Create a skybox out of a sphere which we put in the middle
      * and then draw from the 'inside-out'
      */
-    let sphereGeometry = new SphereGeometry(1000, 64, 64);
+    let sphereGeometry = new SphereGeometry(1500, 64, 64);
     let skyTexture = new TextureLoader().load('resources/textures/sky.png');
     let sphereMaterial = new MeshPhongMaterial( {map: skyTexture, color: 0x87ceeb, side: BackSide});
     let skyBox = new Mesh(sphereGeometry, sphereMaterial);
