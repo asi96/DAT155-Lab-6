@@ -40,9 +40,9 @@ async function main() {
 
     const scene = new Scene();
 
-    let center = new Object3D();
+    let origo = new Object3D();
 
-    scene.add(center);
+    scene.add(origo);
 
     // const axesHelper = new AxesHelper(15);
     // scene.add(axesHelper);
@@ -58,7 +58,7 @@ async function main() {
     let sunGeometry = new SphereGeometry(30, 64, 64);
     let sunMaterial = new MeshPhongMaterial({color: 'yellow', emissive: '#F8CE3B'});
     let sun = new Mesh(sunGeometry, sunMaterial);
-    sun.position.y = 1500;
+    sun.position.y = 1400;
 
     /**
      * Add a moon sphere and move it down
@@ -66,7 +66,7 @@ async function main() {
     let moonGeometry = new SphereGeometry(30, 64, 64);
     let moonMaterial = new MeshPhongMaterial({shininess: 1.0, emissive: '#FFF'});
     let moon = new Mesh(moonGeometry, moonMaterial);
-    moon.position.y = -1500;
+    moon.position.y = -1400;
 
     /**
      * Add both moon and sun to the orbitnode and group it all up into a lightGroup
@@ -78,7 +78,6 @@ async function main() {
     lightGroup.add(centerOrbitNode);
 
     scene.add(lightGroup);
-
 
     const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 6000);
 
@@ -251,7 +250,6 @@ async function main() {
             fog: scene.fog !== undefined
         }
     );
-
     water.rotation.x = - Math.PI / 2;
 
     water.position.setY(2);
@@ -268,9 +266,8 @@ async function main() {
     lava.rotation.x = - Math.PI / 2;
     lava.rotation.z = Math.PI/6;
     lava.position.set(-130, 35, -85)
+
     scene.add(lava);
-
-
 
     //clouds
     function generateBillboardClouds() {
@@ -310,7 +307,6 @@ async function main() {
             //Set positions and scale
             skyPlane.position.set(pX, pY, pZ);
             skyPlane.scale.set(s1, s2);
-
 
             //Add to scene
             scene.add(skyPlane);
@@ -362,6 +358,7 @@ async function main() {
         let ice = new Mesh(icegeo, icemat);
         ice.rotation.x = - Math.PI/2;
         ice.position.set(188, 2.2, 178);
+
         scene.add(ice);
 
         let snowArray = new Array();
@@ -385,6 +382,7 @@ async function main() {
                 10,
                 10
             );
+
             snowArray.push(particle);
             scene.add(particle);
         }
@@ -417,12 +415,12 @@ async function main() {
      * when they 'collide' with the water
      */
     function lightCheck() {
-        if(sun.getWorldPosition(center.position).y <= -50) {
+        if(sun.getWorldPosition(origo.position).y <= -50) {
             sun.visible = false;
             sunLight.intensity = 0.0;
 
             moon.visible = true;
-            moonLight.intensity = 0.4;
+            moonLight.intensity = 0.3;
 
         } else {
             sun.visible = true;
