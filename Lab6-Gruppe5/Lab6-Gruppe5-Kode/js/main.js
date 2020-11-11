@@ -334,6 +334,7 @@ async function main() {
 
             ];
             */
+            /*
             var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
 
             var randomTexture = Math.floor(Math.random() * 4);
