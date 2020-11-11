@@ -7,29 +7,23 @@ import {
     MeshPhongMaterial,
     TextureLoader,
     RepeatWrapping,
-    DirectionalLight,
     Vector3,
-    AxesHelper,
     PlaneBufferGeometry,
-    MeshBasicMaterial,
     PlaneGeometry,
     DoubleSide,
-    CubeCamera,
     BackSide,
-    MeshLambertMaterial,
-    MeshFaceMaterial,
-    ObjectLoader,
     Fog,
     PointLight,
-    AmbientLight,
-    ParticleBasicMaterial,
-    FloatType,
-    Geometry, Points, ParticleSystem, CameraHelper
+    Sprite,
+    SpriteMaterial,
+    SphereGeometry,
+    Object3D,
+    Group
 } from './lib/three.module.js';
 
 import {Water} from '../js/objects/Water.js';
-
 import Utilities from './lib/Utilities.js';
+import Stats from "./lib/Stats.js";
 import MouseLookController from './controls/MouseLookController.js';
 
 import TextureSplattingMaterial from './materials/TextureSplattingMaterial.js';
@@ -37,16 +31,6 @@ import TerrainBufferGeometry from './terrain/TerrainBufferGeometry.js';
 import { GLTFLoader } from './loaders/GLTFLoader.js';
 import { SimplexNoise } from './lib/SimplexNoise.js';
 import {LinearMipmapLinearFilter, RGBFormat, WebGLCubeRenderTarget} from "./lib/three.module.js";
-import {Sprite, SpriteMaterial} from "./lib/three.module.js";
-import {SphereGeometry} from "./lib/three.module.js";
-import {FogExp2} from "./lib/three.module.js";
-import {Object3D} from "./lib/three.module.js";
-import {Group} from "./lib/three.module.js";
-import Stats from "./lib/Stats.js";
-import {Texture} from "./lib/three.module.js";
-import {PointsMaterial} from "./lib/three.module.js";
-
-
 
 async function main() {
 
@@ -56,12 +40,10 @@ async function main() {
 
     scene.add(origo);
 
+    // FPS-counter
     var stats = new Stats();
     stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild( stats.dom );
-
-    // const axesHelper = new AxesHelper(15);
-    // scene.add(axesHelper);
 
     /**
      * Add a orbit node in the middle of the scene for the sun to rotate around
@@ -95,7 +77,7 @@ async function main() {
 
     scene.add(lightGroup);
 
-    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
 
     const renderer = new WebGLRenderer({ antialias: true });
     renderer.setClearColor(0xffffff);
@@ -149,18 +131,16 @@ async function main() {
      * projected onto the terrain
      */
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.height = 30000;
-    sunLight.shadow.mapSize.width = 30000;
+    sunLight.shadow.mapSize.height = 7500;
+    sunLight.shadow.mapSize.width = 7500;
     sunLight.shadow.camera.near = 0.1;
     sunLight.shadow.camera.far = 15000;
 
     moonLight.castShadow = true;
-    moonLight.shadow.mapSize.height = 30000;
-    moonLight.shadow.mapSize.width = 30000;
+    moonLight.shadow.mapSize.height = 7500;
+    moonLight.shadow.mapSize.width = 7500;
     moonLight.shadow.camera.near = 0.1;
     moonLight.shadow.camera.far = 15000;
-
-    sunLight.shadowDarkness = moonLight.shadowDarkness = 0.5;
 
     sun.add(sunLight);
     moon.add(moonLight);
@@ -188,7 +168,7 @@ async function main() {
     texture3.wrapS = RepeatWrapping;
     texture3.wrapT = RepeatWrapping;
 
-    const splatMap = new TextureLoader().load('resources/images/kitts_experiment2.png');
+    const splatMapRock = new TextureLoader().load('resources/images/kitts_splatmap_rock.png');
 
     const splatMapSand = new TextureLoader().load('resources/images/kitts_sand_splat_final.png');
 
@@ -196,11 +176,12 @@ async function main() {
         color: 0xffffff,
         shininess: 0,
         textures: [texture2, texture1, texture3],
-        splatMaps: [splatMap, splatMapSand]
+        splatMaps: [splatMapRock, splatMapSand]
     });
 
     const terrain = new Mesh(terrainGeometry, terrainMaterial);
 
+    // Shadow mapping
     terrain.receiveShadow = true;
 
     scene.add(terrain);
@@ -210,16 +191,14 @@ async function main() {
      */
 
     const loader = new GLTFLoader();
-    const palmtreeTex = new TextureLoader().load('resources/models/palmtree.jpg');
-    const palmtreeMat = new MeshPhongMaterial({map: palmtreeTex});
 
     loader.load(
         // resource URL
-        'resources/models/palmtree.gltf',
+        'resources/models/scene.gltf',
         // called when resource is loaded
         (object) => {
-            for (let x = -2000; x < 2000; x += 8) {
-                for (let z = -2000; z < 2000; z += 8) {
+            for (let x = -2000; x < 2000; x += 13) {
+                for (let z = -2000; z < 2000; z += 13) {
                     
                     // TODO: Uncomment this once you've implemented the terrain.
 
@@ -228,13 +207,13 @@ async function main() {
 
                      const height = terrainGeometry.getHeightAt(px, pz);
 
-                     if (height < 8 && height > 4) {
+                     if (height < 12 && height > 4) {
                          const tree = object.scene.children[0].clone();
 
                          tree.traverse((child) => {
                              if (child.isMesh) {
+                                 // Shadow mapping
                                  child.castShadow = true;
-                                 child.material = palmtreeMat;
                              }
                          });
 
@@ -245,7 +224,7 @@ async function main() {
                          //tree.rotation.y = Math.random() * (2 * Math.PI);
 
 
-                         tree.scale.multiplyScalar((1.5 + Math.random() * 1) * 0.003);
+                         tree.scale.multiplyScalar((1.5 + Math.random() * 1) * 0.0075);
 
                          scene.add(tree);
                      }
@@ -265,13 +244,13 @@ async function main() {
      * Water
      * Adds a water plane to the scene from the Water.js class
      */
-    const waterGeometry = new PlaneBufferGeometry( 3000, 3000, 56,56 );
+    const waterGeometry = new PlaneBufferGeometry( 3000, 3000, 32,32 );
 
     let water = new Water(
         waterGeometry,
         {
-            textureWidth: 3000,
-            textureHeight: 3000,
+            textureWidth: 1000,
+            textureHeight: 1000,
             waterNormals: new TextureLoader().load( 'resources/textures/waternormals.jpg', function ( texture ) {
 
                 texture.wrapS = texture.wrapT = RepeatWrapping;
@@ -285,6 +264,9 @@ async function main() {
             fog: scene.fog !== undefined
         }
     );
+
+    // Shadow mapping
+    water.receiveShadow = true;
 
     water.rotation.x = - Math.PI / 2;
 
@@ -652,7 +634,7 @@ async function main() {
         water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
 
         // Apply rotation to the orbit node for the sun and moon
-        centerOrbitNode.rotation.x += 0.0025;
+        centerOrbitNode.rotation.x += 0.0015;
 
         animateSmoke();
         animateSnow();
