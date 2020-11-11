@@ -42,8 +42,10 @@ import {SphereGeometry} from "./lib/three.module.js";
 import {FogExp2} from "./lib/three.module.js";
 import {Object3D} from "./lib/three.module.js";
 import {Group} from "./lib/three.module.js";
+import Stats from "./lib/Stats.js";
 import {Texture} from "./lib/three.module.js";
 import {PointsMaterial} from "./lib/three.module.js";
+
 
 
 async function main() {
@@ -53,6 +55,10 @@ async function main() {
     let origo = new Object3D();
 
     scene.add(origo);
+
+    var stats = new Stats();
+    stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild( stats.dom );
 
     // const axesHelper = new AxesHelper(15);
     // scene.add(axesHelper);
@@ -89,7 +95,7 @@ async function main() {
 
     scene.add(lightGroup);
 
-    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 6000);
+    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
 
     const renderer = new WebGLRenderer({ antialias: true });
     renderer.setClearColor(0xffffff);
@@ -583,6 +589,8 @@ async function main() {
     let then = performance.now();
     function loop(now) {
 
+        stats.begin();
+
         const delta = now - then;
         then = now;
 
@@ -633,6 +641,8 @@ async function main() {
 
         // render scene:
         renderer.render(scene, camera);
+
+        stats.end();
 
         requestAnimationFrame(loop);
     };
