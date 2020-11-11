@@ -50,10 +50,9 @@ async function main() {
 
     const scene = new Scene();
 
-    let center = new Object3D();
+    let origo = new Object3D();
 
-    scene.add(center);
-
+    scene.add(origo);
 
     // const axesHelper = new AxesHelper(15);
     // scene.add(axesHelper);
@@ -69,7 +68,7 @@ async function main() {
     let sunGeometry = new SphereGeometry(30, 64, 64);
     let sunMaterial = new MeshPhongMaterial({color: 'yellow', emissive: '#F8CE3B'});
     let sun = new Mesh(sunGeometry, sunMaterial);
-    sun.position.y = 1000;
+    sun.position.y = 1400;
 
     /**
      * Add a moon sphere and move it down
@@ -77,7 +76,7 @@ async function main() {
     let moonGeometry = new SphereGeometry(30, 64, 64);
     let moonMaterial = new MeshPhongMaterial({shininess: 1.0, emissive: '#FFF'});
     let moon = new Mesh(moonGeometry, moonMaterial);
-    moon.position.y = -1000;
+    moon.position.y = -1400;
 
     /**
      * Add both moon and sun to the orbitnode and group it all up into a lightGroup
@@ -90,8 +89,7 @@ async function main() {
 
     scene.add(lightGroup);
 
-
-    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
+    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 6000);
 
     const renderer = new WebGLRenderer({ antialias: true });
     renderer.setClearColor(0xffffff);
@@ -100,7 +98,7 @@ async function main() {
     // Enabling shadow mapping
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
-    const canvas = renderer.domElement;
+
     /**
      * Handle window resize:
      *  - update aspect ratio.
@@ -238,14 +236,17 @@ async function main() {
         }
     );
 
-    // Water
-    const waterGeometry = new PlaneBufferGeometry( 2000, 2000, 56,56 );
+    /**
+     * Water
+     * Adds a water plane to the scene from the Water.js class
+     */
+    const waterGeometry = new PlaneBufferGeometry( 3000, 3000, 56,56 );
 
     let water = new Water(
         waterGeometry,
         {
-            textureWidth: 2000,
-            textureHeight: 2000,
+            textureWidth: 3000,
+            textureHeight: 3000,
             waterNormals: new TextureLoader().load( 'resources/textures/waternormals.jpg', function ( texture ) {
 
                 texture.wrapS = texture.wrapT = RepeatWrapping;
@@ -266,13 +267,17 @@ async function main() {
 
     scene.add( water );
 
-    //lava
-    var lavageom = new PlaneGeometry(15,15,33,32);
-    var lavaMat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/lava.png')})
-    var lava = new Mesh(lavageom,lavaMat);
+    /**
+     * Lava
+     * Adds a lava plane to the scene in the crater
+     */
+    let lavageom = new PlaneGeometry(15,15,33,32);
+    let lavaMat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/lava.png'), emissive: 0xFF0000})
+    let lava = new Mesh(lavageom,lavaMat);
     lava.rotation.x = - Math.PI / 2;
     lava.rotation.z = Math.PI/6;
     lava.position.set(-130, 35, -85)
+
     scene.add(lava);
 
 
@@ -329,7 +334,7 @@ async function main() {
 
             ];
             */
-            /*var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
+            var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
 
             var randomTexture = Math.floor(Math.random() * 4);
             var material = new SpriteMaterial({
@@ -345,9 +350,9 @@ async function main() {
             var pZ = Math.random() * 1000 - 500;
             var pY = Math.random() * 50 + 100;
             if(i < 2){
-                pX = Math.random() * 2 + 185;
-                pY = Math.random() * 2 + 100;
-                pZ = Math.random() * 2 + 185;
+                pX = 185;
+                pY = 100;
+                pZ = 185;
             }
             var s1 = 50;
             var s2 = 50;
@@ -375,11 +380,11 @@ async function main() {
     }
 
     //smoke
-    var texture = new TextureLoader().load('resources/textures/smoke2.png');
-            var smokeArray = new Array();
+    let textureSmoke = new TextureLoader().load('resources/textures/smoke2.png');
+            let smokeArray = new Array();
 
-            var smokeMaterial = new SpriteMaterial({
-                map: texture,
+            let smokeMaterial = new SpriteMaterial({
+                map: textureSmoke,
                 transparent: true,
                 opacity: 3.0,
                 side: DoubleSide
@@ -413,17 +418,18 @@ async function main() {
     }
 
 
-        var icegeo = new PlaneGeometry(24, 24, 32, 32);
-        var icemat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/iceTexture.jpg')});
-        var ice = new Mesh(icegeo, icemat);
+        let icegeo = new PlaneGeometry(24, 24, 32, 32);
+        let icemat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/iceTexture.jpg')});
+        let ice = new Mesh(icegeo, icemat);
         ice.rotation.x = - Math.PI/2;
         ice.position.set(188, 2.2, 178);
+
         scene.add(ice);
 
-        var snowArray = new Array();
-        var texture = new TextureLoader().load('resources/textures/snowTexture.png');
-        var snowMaterial = new SpriteMaterial({
-            map: texture,
+        let snowArray = new Array();
+        let textureSnow = new TextureLoader().load('resources/textures/snowTexture.png');
+        let snowMaterial = new SpriteMaterial({
+            map: textureSnow,
             transparent: true,
             opacity: 3.0,
             side: DoubleSide
@@ -443,6 +449,7 @@ async function main() {
             scene.add(snow)
         }
 
+
     function animateSnow(){
         for (let i = 0, l = 100; i<l; i++){
             snowArray[i].position.setX(snowArray[i].position.x + ((Math.random()/10) - 0.05));
@@ -458,7 +465,7 @@ async function main() {
      * Create a skybox out of a sphere which we put in the middle
      * and then draw from the 'inside-out'
      */
-    let sphereGeometry = new SphereGeometry(1000, 64, 64);
+    let sphereGeometry = new SphereGeometry(1500, 64, 64);
     let skyTexture = new TextureLoader().load('resources/textures/sky.png');
     let sphereMaterial = new MeshPhongMaterial( {map: skyTexture, color: 0x87ceeb, side: BackSide});
     let skyBox = new Mesh(sphereGeometry, sphereMaterial);
@@ -470,12 +477,12 @@ async function main() {
      * when they 'collide' with the water
      */
     function lightCheck() {
-        if(sun.getWorldPosition(center.position).y <= -50) {
+        if(sun.getWorldPosition(origo.position).y <= -50) {
             sun.visible = false;
             sunLight.intensity = 0.0;
 
             moon.visible = true;
-            moonLight.intensity = 0.4;
+            moonLight.intensity = 0.3;
 
         } else {
             sun.visible = true;
@@ -494,6 +501,7 @@ async function main() {
 
     // We attach a click lister to the canvas-element so that we can request a pointer lock.
     // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
+    const canvas = renderer.domElement;
 
     canvas.addEventListener('click', () => {
         canvas.requestPointerLock();
@@ -610,7 +618,6 @@ async function main() {
         // apply rotation to velocity vector, and translate moveNode with it.
         velocity.applyQuaternion(camera.quaternion);
         camera.position.add(velocity);
-
 
         // Apply rotation to water
         water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
