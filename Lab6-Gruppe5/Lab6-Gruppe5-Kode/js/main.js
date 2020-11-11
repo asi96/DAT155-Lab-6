@@ -16,7 +16,15 @@ import {
     DoubleSide,
     CubeCamera,
     BackSide,
-    MeshLambertMaterial, MeshFaceMaterial, ObjectLoader, Fog, PointLight, AmbientLight
+    MeshLambertMaterial,
+    MeshFaceMaterial,
+    ObjectLoader,
+    Fog,
+    PointLight,
+    AmbientLight,
+    ParticleBasicMaterial,
+    FloatType,
+    Geometry, Points, ParticleSystem
 } from './lib/three.module.js';
 
 import {Water} from '../js/objects/Water.js';
@@ -35,6 +43,9 @@ import {FogExp2} from "./lib/three.module.js";
 import {Object3D} from "./lib/three.module.js";
 import {Group} from "./lib/three.module.js";
 import Stats from "./lib/Stats.js";
+import {Texture} from "./lib/three.module.js";
+import {PointsMaterial} from "./lib/three.module.js";
+
 
 
 async function main() {
@@ -255,6 +266,7 @@ async function main() {
             fog: scene.fog !== undefined
         }
     );
+
     water.rotation.x = - Math.PI / 2;
 
     water.position.setY(2);
@@ -274,10 +286,52 @@ async function main() {
 
     scene.add(lava);
 
+
+
     //clouds
+
     function generateBillboardClouds() {
-        for(let i = 0; i < 100; i++) {
-            /*var cloudtextures = [
+        var layer = [];
+        var pX = Math.random() * 1000 - 500;
+        var pZ = Math.random() * 1000 - 500;
+        var pY = Math.random() * 50 + 100;
+        for(let i = 0; i < 5 + Math.round(Math.random() * 10); i++){
+            var random = Math.round(Math.random() * 2);
+
+            if(random == 0){
+                var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud1.png');
+            }else if(random == 1){
+                var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud5.png');
+            }else if(random == 2) {
+                var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud4.png');
+            }
+
+
+            var material = new SpriteMaterial(
+            {
+                map: cloudtexture,
+                transparent: true,
+                opacity: 3.0,
+                side: DoubleSide,
+            })
+            if(i == 2){
+                pX = Math.random() * 2 + 185;
+                pY = Math.random() * 2 + 100;
+                pZ = Math.random() * 2 + 185;
+            }
+            var sky = new Sprite(material);
+            sky.position.setX(pX + Math.round(Math.random()*15));
+            sky.position.setY(pY + Math.round(Math.random()*15));
+            sky.position.setZ(pZ + Math.round(Math.random()*15));
+            sky.scale.set(Math.random()*50 + 25, Math.random()*50 + 25);
+            layer.push(sky);
+            scene.add(sky);
+        }
+        return layer;
+    }
+
+        /*for(var i = 0; i < 100; i++) {
+            var cloudtextures = [
                new TextureLoader().load('resources/textures/clouds/c1.jpg'), //Laster inn noen skyteksturer
                 new TextureLoader().load('resources/textures/clouds/c2.jpg'),
                 new TextureLoader().load('resources/textures/clouds/c3.jpg'),
@@ -286,38 +340,51 @@ async function main() {
 
             ];
             */
-            let cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
+            /*
+            var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
 
-            let randomTexture = Math.floor(Math.random() * 4);
-            let material = new SpriteMaterial({
+            var randomTexture = Math.floor(Math.random() * 4);
+            var material = new SpriteMaterial({
                 map: cloudtexture,
                 transparent: true,
                 opacity: 3.0,
                 side: DoubleSide
             });
-            let skyPlane = new Sprite(material);
+            var skyPlane = new Sprite(material);
 
             //Positions- plasser litt tilfeldig
-            let pX = Math.random() * 1000 - 500;
-            let pZ = Math.random() * 1000 - 500;
-            let pY = Math.random() * 50 + 100;
+            var pX = Math.random() * 1000 - 500;
+            var pZ = Math.random() * 1000 - 500;
+            var pY = Math.random() * 50 + 100;
             if(i < 2){
                 pX = 185;
                 pY = 100;
                 pZ = 185;
             }
-            let s1 = 50;
-            let s2 = 50;
+            var s1 = 50;
+            var s2 = 50;
 
             //Set positions and scale
             skyPlane.position.set(pX, pY, pZ);
             skyPlane.scale.set(s1, s2);
 
+
             //Add to scene
             scene.add(skyPlane);
         }
+    }*/
+    var lag = []
+    for(let i = 0; i < 25; i++) {
+        var tabell = generateBillboardClouds();
+        for(let j = 0; j < tabell.length; j++){
+            lag.push(tabell[j]);
+        }
     }
-    generateBillboardClouds();
+    function animateSky(layer){
+        for(let j = 0; j < lag.length; j++){
+            lag[j].material.rotation +=  0.001;
+        }
+    }
 
     //smoke
     let textureSmoke = new TextureLoader().load('resources/textures/smoke2.png');
@@ -374,22 +441,19 @@ async function main() {
             opacity: 3.0,
             side: DoubleSide
         });
-        for(let i = 0, l = 100; i < l; i++) {
-
-            let particle = new Sprite(snowMaterial);
-
-            particle.position.set(
-                Math.random() * 20 + 175,
-                Math.random() * 90 + 2,
-                Math.random() * 20 + 175
+        for(let i = 0; i < 100; i++) {
+            var snow = new Sprite(snowMaterial);
+            snow.position.set(
+                Math.random() * 20 +175,
+                Math.random() * 80 + 5,
+                Math.random() * 20 +175
             );
-            particle.scale.set(
+            snow.scale.set(
                 10,
                 10
-            );
-
-            snowArray.push(particle);
-            scene.add(particle);
+            )
+            snowArray.push(snow);
+            scene.add(snow)
         }
 
 
@@ -572,6 +636,8 @@ async function main() {
 
         animateSmoke();
         animateSnow();
+        animateSky(lag);
+
 
         // render scene:
         renderer.render(scene, camera);
