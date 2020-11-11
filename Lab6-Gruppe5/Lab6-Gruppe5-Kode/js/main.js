@@ -24,7 +24,7 @@ import {
     AmbientLight,
     ParticleBasicMaterial,
     FloatType,
-    Geometry, Points, ParticleSystem
+    Geometry, Points, ParticleSystem, CameraHelper
 } from './lib/three.module.js';
 
 import {Water} from '../js/objects/Water.js';
@@ -144,6 +144,24 @@ async function main() {
     const sunLight = new PointLight(0xfdfbd3, 1.0);
     const moonLight = new PointLight(0xffffff, 0.0);
 
+    /**
+     * Add shadow from the 2 lights to be used on objects that will be
+     * projected onto the terrain
+     */
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.height = 30000;
+    sunLight.shadow.mapSize.width = 30000;
+    sunLight.shadow.camera.near = 0.1;
+    sunLight.shadow.camera.far = 15000;
+
+    moonLight.castShadow = true;
+    moonLight.shadow.mapSize.height = 30000;
+    moonLight.shadow.mapSize.width = 30000;
+    moonLight.shadow.camera.near = 0.1;
+    moonLight.shadow.camera.far = 15000;
+
+    sunLight.shadowDarkness = moonLight.shadowDarkness = 0.5;
+
     sun.add(sunLight);
     moon.add(moonLight);
 
@@ -183,6 +201,8 @@ async function main() {
 
     const terrain = new Mesh(terrainGeometry, terrainMaterial);
 
+    terrain.receiveShadow = true;
+
     scene.add(terrain);
 
     /**
@@ -214,7 +234,6 @@ async function main() {
                          tree.traverse((child) => {
                              if (child.isMesh) {
                                  child.castShadow = true;
-                                 child.receiveShadow = true;
                                  child.material = palmtreeMat;
                              }
                          });
@@ -373,6 +392,7 @@ async function main() {
             scene.add(skyPlane);
         }
     }*/
+
     var lag = []
     for(let i = 0; i < 25; i++) {
         var tabell = generateBillboardClouds();
