@@ -40,6 +40,8 @@ async function main() {
 
     scene.add(origo);
 
+    scene.fog = new Fog(0xfdfbd3,1,3000)
+
     // FPS-counter
     var stats = new Stats();
     stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -117,7 +119,7 @@ async function main() {
 
     /**
      * Add terrain:
-     * 
+     *
      * We have to wait for the image file to be loaded by the browser.
      * There are many ways to handle asynchronous flow in your application.
      * We are using the async/await language constructs of Javascript:
@@ -199,7 +201,7 @@ async function main() {
         (object) => {
             for (let x = -2000; x < 2000; x += 13) {
                 for (let z = -2000; z < 2000; z += 13) {
-                    
+
                     // TODO: Uncomment this once you've implemented the terrain.
 
                      const px = x + 1 + (6 * Math.random()) - 3;
