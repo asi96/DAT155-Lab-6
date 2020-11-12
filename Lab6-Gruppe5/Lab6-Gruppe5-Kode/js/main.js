@@ -40,7 +40,7 @@ async function main() {
 
     scene.add(origo);
 
-    scene.fog = new Fog(0xfdfbd3,1,3000)
+    scene.fog = new Fog(0xbcd1ec,1,500)
 
     // FPS-counter
     var stats = new Stats();
@@ -495,12 +495,14 @@ async function main() {
             moon.visible = true;
             moonLight.intensity = 0.3;
 
+
         } else {
             sun.visible = true;
             sunLight.intensity = 1.0;
 
             moon.visible = false;
             moonLight.intensity = 0.0;
+
         }
     }
 
@@ -535,13 +537,31 @@ async function main() {
         }
     });
 
+    let setting = {
+        toggleFog: false
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'KeyF') {
+            setting.toggleFog = true;
+            e.preventDefault();
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.code === 'KeyF') {
+            setting.toggleFog = false;
+            e.preventDefault();
+        }
+    });
+
     let move = {
         forward: false,
         backward: false,
         left: false,
         right: false,
         speed: 0.01,
-        up: false
+        up: false,
     };
 
     window.addEventListener('keydown', (e) => {
@@ -563,7 +583,7 @@ async function main() {
         }else if(e.code === 'KeyX'){
             move.speed -=0.05;
             e.preventDefault();
-        }else if(e.code === 'Space'){
+        }else if(e.code === 'Space') {
             move.up = true;
             e.preventDefault();
         }
@@ -622,6 +642,18 @@ async function main() {
         if(move.up){
             velocity.y += moveSpeed;
         }
+        if(setting.toggleFog) {
+            if (scene.fog === null) {
+                if (sun.visible) {
+                    scene.fog = new Fog(0xbcd1ec, 1, 500);
+                } else {
+                    scene.fog = new Fog(0x454c62, 1, 500);
+                }
+            } else {
+                scene.fog = null;
+            }
+        }
+
 
         // update controller rotation.
         mouseLookController.update(pitch, yaw);
