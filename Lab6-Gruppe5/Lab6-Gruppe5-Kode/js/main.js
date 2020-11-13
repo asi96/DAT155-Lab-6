@@ -471,6 +471,22 @@ async function main() {
     }
 
     /**
+     * Adds a rock with bump mapping
+     *
+     */
+    let rockGeometry = new SphereGeometry(10, 64, 64);
+    let rockTexture = new TextureLoader().load('resources/textures/rock1.jpg');
+    let rockBump = new TextureLoader().load('resources/textures/rock1bump3.jpg');
+    let rockMaterial = new MeshPhongMaterial({map: rockTexture, bumpMap: rockBump});
+    let rock = new Mesh(rockGeometry, rockMaterial);
+    rock.position.set(30,0,80)
+    rock.castShadow = true;
+    rock.receiveShadow = true;
+    scene.add(rock);
+
+
+
+    /**
      * Create a skybox out of a sphere which we put in the middle
      * and then draw from the 'inside-out'
      */
@@ -632,14 +648,14 @@ async function main() {
         if(move.up){
             velocity.y += moveSpeed;
         }
-        
+
         // Legg til fog i scenen hvis man trykker på knappen 'F'
         if(setting.toggleFog) {
             if (scene.fog === null) {
                 if (sun.visible) {
                     scene.fog = new Fog(0xbcd1ec, 1, 500);
                 } else {
-                    scene.fog = new Fog(0x454c62, 1, 500);
+                    scene.fog = new Fog(0x212533, 1, 500);
                 }
             } else {
                 scene.fog = null;
