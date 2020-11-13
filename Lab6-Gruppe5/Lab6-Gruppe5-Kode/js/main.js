@@ -541,20 +541,6 @@ async function main() {
         toggleFog: false
     }
 
-    window.addEventListener('keydown', (e) => {
-        if (e.code === 'KeyF') {
-            setting.toggleFog = true;
-            e.preventDefault();
-        }
-    });
-
-    window.addEventListener('keyup', (e) => {
-        if (e.code === 'KeyF') {
-            setting.toggleFog = false;
-            e.preventDefault();
-        }
-    });
-
     let move = {
         forward: false,
         backward: false,
@@ -586,6 +572,9 @@ async function main() {
         }else if(e.code === 'Space') {
             move.up = true;
             e.preventDefault();
+        }else if(e.code === 'KeyF') {
+            setting.toggleFog = true;
+            e.preventDefault();
         }
     });
 
@@ -604,6 +593,9 @@ async function main() {
             e.preventDefault();
         }else if(e.code === 'Space'){
             move.up = false;
+            e.preventDefault();
+        }else if (e.code === 'KeyF') {
+            setting.toggleFog = false;
             e.preventDefault();
         }
     });
