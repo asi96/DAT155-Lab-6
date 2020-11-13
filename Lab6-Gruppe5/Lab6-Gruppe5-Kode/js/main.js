@@ -40,8 +40,6 @@ async function main() {
 
     scene.add(origo);
 
-    scene.fog = new Fog(0xbcd1ec,1,500)
-
     // FPS-counter
     var stats = new Stats();
     stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -56,7 +54,7 @@ async function main() {
      * Add a sun sphere and move it up
      */
     let sunGeometry = new SphereGeometry(30, 64, 64);
-    let sunMaterial = new MeshPhongMaterial({color: 'yellow', emissive: '#F8CE3B'});
+    let sunMaterial = new MeshPhongMaterial({color: 'yellow', emissive: '#F8CE3B', fog: false});
     let sun = new Mesh(sunGeometry, sunMaterial);
     sun.position.y = 1400;
 
@@ -64,7 +62,7 @@ async function main() {
      * Add a moon sphere and move it down
      */
     let moonGeometry = new SphereGeometry(30, 64, 64);
-    let moonMaterial = new MeshPhongMaterial({shininess: 1.0, emissive: '#FFF'});
+    let moonMaterial = new MeshPhongMaterial({shininess: 1.0, emissive: '#FFF', fog: false});
     let moon = new Mesh(moonGeometry, moonMaterial);
     moon.position.y = -1400;
 
@@ -634,6 +632,8 @@ async function main() {
         if(move.up){
             velocity.y += moveSpeed;
         }
+        
+        // Legg til fog i scenen hvis man trykker på knappen 'F'
         if(setting.toggleFog) {
             if (scene.fog === null) {
                 if (sun.visible) {
