@@ -475,8 +475,21 @@ async function main() {
      *
      */
     let rockGeometry = new SphereGeometry(10, 64, 64);
-    let rockTexture = new TextureLoader().load('resources/textures/rock1.jpg');
-    let rockBump = new TextureLoader().load('resources/textures/rock1bump3.jpg');
+
+    // Test ut forskjellige textures og bump maps.
+
+    //let rockTexture = new TextureLoader().load('resources/textures/rock_03.jpg');
+    //let rockBump = new TextureLoader().load('resources/textures/rock_03bump.jpg');
+
+    //let rockTexture = new TextureLoader().load('resources/textures/rock_02.jpg');
+    //let rockBump = new TextureLoader().load('resources/textures/rock_02bump2.jpg');
+
+    let rockTexture = new TextureLoader().load('resources/textures/rock_02.jpg');
+    let rockBump = new TextureLoader().load('resources/textures/rock_04bump2.jpg');
+
+    //let rockTexture = new TextureLoader().load('resources/textures/rock_04.jpg');
+    //let rockBump = new TextureLoader().load('resources/textures/rock_04bump2.jpg');
+
     let rockMaterial = new MeshPhongMaterial({map: rockTexture, bumpMap: rockBump});
     let rock = new Mesh(rockGeometry, rockMaterial);
     rock.position.set(30,0,80)
