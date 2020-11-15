@@ -295,9 +295,9 @@ async function main() {
     //clouds
 
     function generateBillboardClouds(snø) {
-        var pX = Math.random() * 1000 - 500;
-        var pZ = Math.random() * 1000 - 500;
-        var pY = Math.random() * 50 + 100;
+        var pX = Math.random() * 2500 - 1250;
+        var pZ = Math.random() * 2500 - 1250;
+        var pY = Math.random() * 100 + 200;
         var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud4.png');
         var material = new SpriteMaterial(
                 {
@@ -368,7 +368,7 @@ async function main() {
 }*/
 
     var lag = []
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 100; i++) {
         if(i == 0){
             var sky = generateBillboardClouds(true);
         } else {
