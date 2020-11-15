@@ -31,6 +31,8 @@ import TerrainBufferGeometry from './terrain/TerrainBufferGeometry.js';
 import { GLTFLoader } from './loaders/GLTFLoader.js';
 import { SimplexNoise } from './lib/SimplexNoise.js';
 import {LinearMipmapLinearFilter, RGBFormat, WebGLCubeRenderTarget} from "./lib/three.module.js";
+import {update} from "./objects/Smoke.js";
+import {smoke} from "./objects/Smoke.js";
 
 async function main() {
 
@@ -126,26 +128,27 @@ async function main() {
      *  - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function
      */
     const sunLight = new PointLight(0xfdfbd3, 1.0);
-    const moonLight = new PointLight(0xffffff, 0.0);
+    const moonLight = new PointLight(0xffffff, 0.3);
 
     /**
      * Add shadow from the 2 lights to be used on objects that will be
      * projected onto the terrain
      */
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.height = 7500;
-    sunLight.shadow.mapSize.width = 7500;
+    sunLight.shadow.mapSize.height = 4096;
+    sunLight.shadow.mapSize.width = 4096;
     sunLight.shadow.camera.near = 0.1;
-    sunLight.shadow.camera.far = 15000;
+    sunLight.shadow.camera.far = 3000;
 
     moonLight.castShadow = true;
-    moonLight.shadow.mapSize.height = 7500;
-    moonLight.shadow.mapSize.width = 7500;
+    moonLight.shadow.mapSize.height = 4096;
+    moonLight.shadow.mapSize.width = 4096;
     moonLight.shadow.camera.near = 0.1;
-    moonLight.shadow.camera.far = 15000;
+    moonLight.shadow.camera.far = 3000;
 
     sun.add(sunLight);
     moon.add(moonLight);
+    moon.visible = false;
 
     const heightmapImage = await Utilities.loadImage('resources/images/kitts_experiment.png');
 
@@ -293,100 +296,92 @@ async function main() {
 
     //clouds
 
-    function generateBillboardClouds() {
-        var layer = [];
+    function generateBillboardClouds(snø) {
         var pX = Math.random() * 1000 - 500;
         var pZ = Math.random() * 1000 - 500;
         var pY = Math.random() * 50 + 100;
-        for(let i = 0; i < 5 + Math.round(Math.random() * 10); i++){
-            var random = Math.round(Math.random() * 2);
-
-            if(random == 0){
-                var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud1.png');
-            }else if(random == 1){
-                var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud5.png');
-            }else if(random == 2) {
-                var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud4.png');
-            }
-
-
-            var material = new SpriteMaterial(
-            {
-                map: cloudtexture,
-                transparent: true,
-                opacity: 3.0,
-                side: DoubleSide,
-            })
-            if(i == 2){
-                pX = Math.random() * 2 + 185;
-                pY = Math.random() * 2 + 100;
-                pZ = Math.random() * 2 + 185;
+        var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud4.png');
+        var material = new SpriteMaterial(
+                {
+                    map: cloudtexture,
+                    transparent: true,
+                    opacity: 0.7,
+                    depthTest: true,
+                    depthWrite: true
+                })
+            if (snø) {
+                pX = Math.random() * 2 + 180;
+                pY = Math.random() * 2 + 85;
+                pZ = Math.random() * 2 + 180;
             }
             var sky = new Sprite(material);
-            sky.position.setX(pX + Math.round(Math.random()*15));
-            sky.position.setY(pY + Math.round(Math.random()*15));
-            sky.position.setZ(pZ + Math.round(Math.random()*15));
-            sky.scale.set(Math.random()*50 + 25, Math.random()*50 + 25);
-            layer.push(sky);
+            sky.position.setX(pX + Math.round(Math.random() * 15));
+            sky.position.setY(pY + Math.round(Math.random() * 15));
+            sky.position.setZ(pZ + Math.round(Math.random() * 15));
+            sky.scale.set( 50,  50);
             scene.add(sky);
-        }
-        return layer;
+        return sky;
     }
 
-        /*for(var i = 0; i < 100; i++) {
-            var cloudtextures = [
-               new TextureLoader().load('resources/textures/clouds/c1.jpg'), //Laster inn noen skyteksturer
-                new TextureLoader().load('resources/textures/clouds/c2.jpg'),
-                new TextureLoader().load('resources/textures/clouds/c3.jpg'),
-                new TextureLoader().load('resources/textures/clouds/c4.jpg'),
-                new TextureLoader().load('resources/textures/clouds/c5.jpg')
+    //generateBillboardClouds(true);
 
-            ];
-            */
-            /*
-            var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
+    /*for(var i = 0; i < 100; i++) {
+        var cloudtextures = [
+           new TextureLoader().load('resources/textures/clouds/c1.jpg'), //Laster inn noen skyteksturer
+            new TextureLoader().load('resources/textures/clouds/c2.jpg'),
+            new TextureLoader().load('resources/textures/clouds/c3.jpg'),
+            new TextureLoader().load('resources/textures/clouds/c4.jpg'),
+            new TextureLoader().load('resources/textures/clouds/c5.jpg')
 
-            var randomTexture = Math.floor(Math.random() * 4);
-            var material = new SpriteMaterial({
-                map: cloudtexture,
-                transparent: true,
-                opacity: 3.0,
-                side: DoubleSide
-            });
-            var skyPlane = new Sprite(material);
+        ];
+        */
+    /*
+    var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
 
-            //Positions- plasser litt tilfeldig
-            var pX = Math.random() * 1000 - 500;
-            var pZ = Math.random() * 1000 - 500;
-            var pY = Math.random() * 50 + 100;
-            if(i < 2){
-                pX = 185;
-                pY = 100;
-                pZ = 185;
-            }
-            var s1 = 50;
-            var s2 = 50;
+    var randomTexture = Math.floor(Math.random() * 4);
+    var material = new SpriteMaterial({
+        map: cloudtexture,
+        transparent: true,
+        opacity: 3.0,
+        side: DoubleSide
+    });
+    var skyPlane = new Sprite(material);
 
-            //Set positions and scale
-            skyPlane.position.set(pX, pY, pZ);
-            skyPlane.scale.set(s1, s2);
+    //Positions- plasser litt tilfeldig
+    var pX = Math.random() * 1000 - 500;
+    var pZ = Math.random() * 1000 - 500;
+    var pY = Math.random() * 50 + 100;
+    if(i < 2){
+        pX = 185;
+        pY = 100;
+        pZ = 185;
+    }
+    var s1 = 50;
+    var s2 = 50;
+
+    //Set positions and scale
+    skyPlane.position.set(pX, pY, pZ);
+    skyPlane.scale.set(s1, s2);
 
 
-            //Add to scene
-            scene.add(skyPlane);
-        }
-    }*/
+    //Add to scene
+    scene.add(skyPlane);
+}
+}*/
 
     var lag = []
-    for(let i = 0; i < 25; i++) {
-        var tabell = generateBillboardClouds();
-        for(let j = 0; j < tabell.length; j++){
-            lag.push(tabell[j]);
+    for (let i = 0; i < 50; i++) {
+        if(i == 0){
+            var sky = generateBillboardClouds(true);
+        } else {
+            var sky = generateBillboardClouds(false);
         }
+        lag.push(sky);
     }
-    function animateSky(layer){
-        for(let j = 0; j < lag.length; j++){
-            lag[j].material.rotation +=  0.001;
+
+    function animateSky(layer) {
+        for (let j = 0; j < lag.length; j++) {
+            lag[j].material.rotation += 0.001;
         }
     }
 
@@ -397,7 +392,7 @@ async function main() {
             let smokeMaterial = new SpriteMaterial({
                 map: textureSmoke,
                 transparent: true,
-                opacity: 3.0,
+                opacity: 0.1,
                 side: DoubleSide
             });
 
@@ -418,6 +413,10 @@ async function main() {
                 //particle.rotation.z = Math.random() * 360;
                 scene.add(particle);
             };
+
+    //let particleSystem = smoke();
+    //scene.add(particleSystem);
+
 
     function animateSmoke(){
        for (let i = 0, l = 100; i<l; i++){
@@ -442,7 +441,7 @@ async function main() {
         let snowMaterial = new SpriteMaterial({
             map: textureSnow,
             transparent: true,
-            opacity: 3.0,
+            opacity: 0.6,
             side: DoubleSide
         });
         for(let i = 0; i < 100; i++) {
@@ -488,20 +487,20 @@ async function main() {
      * when they 'collide' with the water
      */
     function lightCheck() {
-        if(sun.getWorldPosition(origo.position).y <= -50) {
+        if(sun.getWorldPosition(origo.position).y <= -50 && !moon.visible) {
             sun.visible = false;
-            sunLight.intensity = 0.0;
+            sun.remove(sunLight);
 
             moon.visible = true;
-            moonLight.intensity = 0.3;
+            moon.add(moonLight);
 
 
-        } else {
+        } else if (sun.getWorldPosition(origo.position).y >= -50 && !sun.visible)  {
             sun.visible = true;
-            sunLight.intensity = 1.0;
+            sun.add(sunLight);
 
             moon.visible = false;
-            moonLight.intensity = 0.0;
+            moon.remove(moonLight);
 
         }
     }
@@ -609,6 +608,8 @@ async function main() {
     });
 
     const velocity = new Vector3(0.0, 0.0, 0.0);
+
+
 
     let then = performance.now();
     function loop(now) {
