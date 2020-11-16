@@ -4,83 +4,40 @@ import {
     PCFSoftShadowMap,
     Scene,
     Mesh,
-    MeshPhongMaterial,
     TextureLoader,
     RepeatWrapping,
     Vector3,
     PlaneBufferGeometry,
-    PlaneGeometry,
-    DoubleSide,
-    BackSide,
     Fog,
-    PointLight,
-    Sprite,
-    SpriteMaterial,
-    SphereGeometry,
-    Object3D,
-    Group, CatmullRomCurve3, DataTexture, FloatType, NearestFilter, InstancedMesh
+    CatmullRomCurve3
 } from './lib/three.module.js';
-
-import {Water} from '../js/objects/Water.js';
-import Utilities from './lib/Utilities.js';
-import Stats from "./lib/Stats.js";
-import MouseLookController from './controls/MouseLookController.js';
 
 import TextureSplattingMaterial from './materials/TextureSplattingMaterial.js';
 import TerrainBufferGeometry from './terrain/TerrainBufferGeometry.js';
 import { GLTFLoader } from './loaders/GLTFLoader.js';
-import { SimplexNoise } from './lib/SimplexNoise.js';
-import {LinearMipmapLinearFilter, RGBFormat, WebGLCubeRenderTarget} from "./lib/three.module.js";
 import {generateLava} from "./objects/Lava.js";
 import {generateBillboardClouds, animateSky} from "./objects/Clouds.js";
 import {generateSmoke, animateSmoke} from "./objects/Smoke.js";
 import {animateSnow, generateIce, generateSno} from "./objects/Winter.js";
 
-let curve;
+import DayNightCycle from "./objects/DayNightCycle.js";
+import Skybox from "./objects/Skybox.js";
+import Rock from "./objects/Rock.js";
+import {Water} from '../js/objects/Water.js';
+import Utilities from './lib/Utilities.js';
+import Stats from "./lib/Stats.js";
+import MouseLookController from './controls/MouseLookController.js';
+
 async function main() {
 
     const scene = new Scene();
 
-    let origo = new Object3D();
-
-    scene.add(origo);
-
-    // FPS-counter
+    /**
+     * Add a FPS-counter to the top-left of the screen
+     */
     var stats = new Stats();
     stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild( stats.dom );
-
-    /**
-     * Add a orbit node in the middle of the scene for the sun to rotate around
-     */
-    let centerOrbitNode = new Object3D();
-
-    /**
-     * Add a sun sphere and move it up
-     */
-    let sunGeometry = new SphereGeometry(30, 64, 64);
-    let sunMaterial = new MeshPhongMaterial({color: 'yellow', emissive: '#F8CE3B', fog: false});
-    let sun = new Mesh(sunGeometry, sunMaterial);
-    sun.position.y = 1400;
-
-    /**
-     * Add a moon sphere and move it down
-     */
-    let moonGeometry = new SphereGeometry(30, 64, 64);
-    let moonMaterial = new MeshPhongMaterial({shininess: 1.0, emissive: '#FFF', fog: false});
-    let moon = new Mesh(moonGeometry, moonMaterial);
-    moon.position.y = -1400;
-
-    /**
-     * Add both moon and sun to the orbitnode and group it all up into a lightGroup
-     */
-    centerOrbitNode.add(sun);
-    centerOrbitNode.add(moon);
-
-    const lightGroup = new Group();
-    lightGroup.add(centerOrbitNode);
-
-    scene.add(lightGroup);
 
     const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
 
@@ -117,9 +74,6 @@ async function main() {
     camera.position.y = 55;
     camera.rotation.x -= Math.PI * 0.25;
 
-
-
-
     /**
      * Add terrain:
      *
@@ -128,29 +82,6 @@ async function main() {
      * We are using the async/await language constructs of Javascript:
      *  - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function
      */
-    const sunLight = new PointLight(0xfdfbd3, 1.0);
-    const moonLight = new PointLight(0xffffff, 0.3);
-
-    /**
-     * Add shadow from the 2 lights to be used on objects that will be
-     * projected onto the terrain
-     */
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.height = 4096;
-    sunLight.shadow.mapSize.width = 4096;
-    sunLight.shadow.camera.near = 0.1;
-    sunLight.shadow.camera.far = 3000;
-
-    moonLight.castShadow = true;
-    moonLight.shadow.mapSize.height = 4096;
-    moonLight.shadow.mapSize.width = 4096;
-    moonLight.shadow.camera.near = 0.1;
-    moonLight.shadow.camera.far = 3000;
-
-    sun.add(sunLight);
-    moon.add(moonLight);
-    moon.visible = false;
-
     const heightmapImage = await Utilities.loadImage('resources/images/kitts_experiment.png');
 
     const terrainGeometry = new TerrainBufferGeometry({ heightmapImage, width: 500, height: 50});
@@ -169,7 +100,7 @@ async function main() {
 
     texture2.repeat.set(15, 15);
 
-    const texture3 = new TextureLoader().load('./resources/textures/sand2.png');
+    const texture3 = new TextureLoader().load('./resources/textures/sand.png');
 
     texture3.wrapS = RepeatWrapping;
     texture3.wrapT = RepeatWrapping;
@@ -193,9 +124,13 @@ async function main() {
     scene.add(terrain);
 
     /**
+     * Add a day/night cycle to the scene with changing PointLights
+     */
+    const dayNightCycle = new DayNightCycle(scene);
+
+    /**
      * Add trees:
      */
-
     const loader = new GLTFLoader();
 
     loader.load(
@@ -246,10 +181,14 @@ async function main() {
         }
     );
 
+    /**
+     * Adds a ship object to the scene which moves along a curve
+     * @type {number}
+     */
     let fraction = 0;
     let up = new Vector3(0,1,0);
     let axis = new Vector3();
-    curve = new CatmullRomCurve3([
+    let curve = new CatmullRomCurve3([
         new Vector3(1000, 3 , 0),
         new Vector3(0, 3 , 1000),
         new Vector3(-1000, 3 , 0),
@@ -272,8 +211,6 @@ async function main() {
     let skip = await loadShip();
     //radius 1500;
 
-
-
     /**
      * Water
      * Adds a water plane to the scene from the Water.js class
@@ -283,8 +220,8 @@ async function main() {
     let water = new Water(
         waterGeometry,
         {
-            textureWidth: 1000,
-            textureHeight: 1000,
+            textureWidth: 512,
+            textureHeight: 512,
             waterNormals: new TextureLoader().load( 'resources/textures/waternormals.jpg', function ( texture ) {
 
                 texture.wrapS = texture.wrapT = RepeatWrapping;
@@ -303,10 +240,8 @@ async function main() {
     water.receiveShadow = true;
 
     water.rotation.x = - Math.PI / 2;
-
     water.position.setY(2);
-
-    scene.add( water );
+    scene.add(water);
 
     /**
      * Lava
@@ -315,10 +250,9 @@ async function main() {
     let lava = generateLava();
     scene.add(lava);
 
-
-
-    //clouds
-
+    /**
+     * Clouds in the sky
+     */
     var skyTab = []
     for (let i = 0; i < 100; i++) {
         if(i == 0){
@@ -330,7 +264,9 @@ async function main() {
         scene.add(sky);
     }
 
-    //smoke
+    /**
+     * Smoke from volcano
+     */
     let roykTab = [];
     for (let p = 0, l = 100; p < l; p++) {
         let royk = generateSmoke();
@@ -338,8 +274,9 @@ async function main() {
         scene.add(royk);
     }
 
-
-
+    /**
+     * Create an ice plane and snow coming from a cloud above it
+     */
     let ice = generateIce();
     scene.add(ice);
 
@@ -350,75 +287,22 @@ async function main() {
         scene.add(sno);
     }
 
-
-
     /**
      * Adds a rock with bump mapping
      *
      */
-    let rockGeometry = new SphereGeometry(10, 64, 64);
-
-    // Test ut forskjellige textures og bump maps.
-
-    //let rockTexture = new TextureLoader().load('resources/textures/rock_03.jpg');
-    //let rockBump = new TextureLoader().load('resources/textures/rock_03bump.jpg');
-
-    //let rockTexture = new TextureLoader().load('resources/textures/rock_02.jpg');
-    //let rockBump = new TextureLoader().load('resources/textures/rock_02bump2.jpg');
-
-    let rockTexture = new TextureLoader().load('resources/textures/rock_02.jpg');
-    let rockBump = new TextureLoader().load('resources/textures/rock_04bump2.jpg');
-
-    //let rockTexture = new TextureLoader().load('resources/textures/rock_04.jpg');
-    //let rockBump = new TextureLoader().load('resources/textures/rock_04bump2.jpg');
-
-    let rockMaterial = new MeshPhongMaterial({map: rockTexture, bumpMap: rockBump});
-    let rock = new Mesh(rockGeometry, rockMaterial);
-    rock.position.set(30,0,80)
-    rock.castShadow = true;
-    rock.receiveShadow = true;
-    scene.add(rock);
-
-
+    const rock = new Rock();
+    rock.addRock(scene);
 
     /**
-     * Create a skybox out of a sphere which we put in the middle
-     * and then draw from the 'inside-out'
+     * Adds skybox to scene
      */
-    let sphereGeometry = new SphereGeometry(1500, 64, 64);
-    let skyTexture = new TextureLoader().load('resources/textures/sky.png');
-    let sphereMaterial = new MeshPhongMaterial( {map: skyTexture, color: 0x87ceeb, side: BackSide});
-    let skyBox = new Mesh(sphereGeometry, sphereMaterial);
-
-    scene.add(skyBox);
-
-    /**
-     * Helper-function called every frame to disable/enable the sun/moon
-     * when they 'collide' with the water
-     */
-    function lightCheck() {
-        if(sun.getWorldPosition(origo.position).y <= -50 && !moon.visible) {
-            sun.visible = false;
-            sun.remove(sunLight);
-
-            moon.visible = true;
-            moon.add(moonLight);
-
-
-        } else if (sun.getWorldPosition(origo.position).y >= -50 && !sun.visible)  {
-            sun.visible = true;
-            sun.add(sunLight);
-
-            moon.visible = false;
-            moon.remove(moonLight);
-
-        }
-    }
+    const skyBox = new Skybox();
+    skyBox.addSkyBox(scene);
 
     /**
      * Set up camera controller:
      */
-
     const mouseLookController = new MouseLookController(camera);
 
     // We attach a click lister to the canvas-element so that we can request a pointer lock.
@@ -516,12 +400,14 @@ async function main() {
     let then = performance.now();
     function loop(now) {
 
+        // FPS-counter
         stats.begin();
 
         const delta = now - then;
         then = now;
 
-        lightCheck();
+        // Check if the sun has passed the water plane
+        dayNightCycle.lightCheck();
 
         const moveSpeed = move.speed * delta + 3;
 
@@ -546,10 +432,12 @@ async function main() {
             velocity.y += moveSpeed;
         }
 
-        // Legg til fog i scenen hvis man trykker på knappen 'F'
+        /**
+         * Legg til fog i scenen hvis man trykker på knappen 'F'
+         */
         if(setting.toggleFog) {
             if (scene.fog === null) {
-                if (sun.visible) {
+                if (dayNightCycle.sun.visible) {
                     scene.fog = new Fog(0xbcd1ec, 1, 500);
                 } else {
                     scene.fog = new Fog(0x212533, 1, 500);
@@ -558,7 +446,6 @@ async function main() {
                 scene.fog = null;
             }
         }
-
 
         // update controller rotation.
         mouseLookController.update(pitch, yaw);
@@ -572,13 +459,10 @@ async function main() {
         // Apply rotation to water
         water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
 
-        // Apply rotation to the orbit node for the sun and moon
-        centerOrbitNode.rotation.x += 0.0015;
-
+        dayNightCycle.animateCycle();
         animateSmoke(roykTab);
         animateSnow(snoTab);
         animateSky(skyTab);
-
 
         const newPosition = curve.getPoint(fraction);
         //const tangent = curve.getTangent(fraction);
@@ -591,7 +475,7 @@ async function main() {
         //skip.quaternion.setFromAxisAngle(zz, angle);
         skip.rotation.z = Math.atan2(curve.getPoint(fraction + 0.001).x - skip.position.x,
             curve.getPoint(fraction + 0.001).y - skip.position.y);
-        fraction +=0.001;
+        fraction +=0.0001;
         if(fraction > 1){
             fraction = 0;
         }
@@ -599,14 +483,13 @@ async function main() {
         // render scene:
         renderer.render(scene, camera);
 
+        // FPS-counter
         stats.end();
 
         requestAnimationFrame(loop);
     };
 
     loop(performance.now());
-
-
 }
 
 main(); // Start application
