@@ -18,7 +18,7 @@ import {
     SpriteMaterial,
     SphereGeometry,
     Object3D,
-    Group
+    Group, CatmullRomCurve3, DataTexture, FloatType, NearestFilter, InstancedMesh
 } from './lib/three.module.js';
 
 import {Water} from '../js/objects/Water.js';
@@ -31,9 +31,12 @@ import TerrainBufferGeometry from './terrain/TerrainBufferGeometry.js';
 import { GLTFLoader } from './loaders/GLTFLoader.js';
 import { SimplexNoise } from './lib/SimplexNoise.js';
 import {LinearMipmapLinearFilter, RGBFormat, WebGLCubeRenderTarget} from "./lib/three.module.js";
-import {update} from "./objects/Smoke.js";
-import {smoke} from "./objects/Smoke.js";
+import {generateLava} from "./objects/Lava.js";
+import {generateBillboardClouds, animateSky} from "./objects/Clouds.js";
+import {generateSmoke, animateSmoke} from "./objects/Smoke.js";
+import {animateSnow, generateIce, generateSno} from "./objects/Winter.js";
 
+let curve;
 async function main() {
 
     const scene = new Scene();
@@ -243,6 +246,34 @@ async function main() {
         }
     );
 
+    let fraction = 0;
+    let up = new Vector3(0,1,0);
+    let axis = new Vector3();
+    curve = new CatmullRomCurve3([
+        new Vector3(1000, 3 , 0),
+        new Vector3(0, 3 , 1000),
+        new Vector3(-1000, 3 , 0),
+        new Vector3(0 , 3 , -1000)]
+    );
+    curve.closed = true;
+    async function loadShip() {
+        const shipLoader = new GLTFLoader();
+        const skipData = await shipLoader.loadAsync('resources/models/skip/scene.gltf');
+        const skip = skipData.scene.children[0];
+        skip.position.x = 1000;
+        skip.position.z = 0;
+        skip.scale.multiplyScalar(0.1);
+        //skip.rotateX(-0.1);
+        skip.position.y = 3;
+
+        scene.add(skip);
+        return skip;
+    }
+    let skip = await loadShip();
+    //radius 1500;
+
+
+
     /**
      * Water
      * Adds a water plane to the scene from the Water.js class
@@ -281,193 +312,45 @@ async function main() {
      * Lava
      * Adds a lava plane to the scene in the crater
      */
-    let lavageom = new PlaneGeometry(15,15,33,32);
-    let lavaMat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/lava.png'), emissive: 0xFF0000})
-    let lava = new Mesh(lavageom,lavaMat);
-    lava.rotation.x = - Math.PI / 2;
-    lava.rotation.z = Math.PI/6;
-    lava.position.set(-130, 35, -85)
-
+    let lava = generateLava();
     scene.add(lava);
 
 
 
     //clouds
 
-    function generateBillboardClouds(snø) {
-        var pX = Math.random() * 2500 - 1250;
-        var pZ = Math.random() * 2500 - 1250;
-        var pY = Math.random() * 100 + 200;
-        var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud4.png');
-        var material = new SpriteMaterial(
-                {
-                    map: cloudtexture,
-                    transparent: true,
-                    opacity: 0.7,
-                    depthTest: true,
-                    depthWrite: true
-                })
-            if (snø) {
-                pX = Math.random() * 2 + 180;
-                pY = Math.random() * 2 + 85;
-                pZ = Math.random() * 2 + 180;
-            }
-            var sky = new Sprite(material);
-            sky.position.setX(pX + Math.round(Math.random() * 15));
-            sky.position.setY(pY + Math.round(Math.random() * 15));
-            sky.position.setZ(pZ + Math.round(Math.random() * 15));
-            sky.scale.set( 50,  50);
-            scene.add(sky);
-        return sky;
-    }
-
-    //generateBillboardClouds(true);
-
-    /*for(var i = 0; i < 100; i++) {
-        var cloudtextures = [
-           new TextureLoader().load('resources/textures/clouds/c1.jpg'), //Laster inn noen skyteksturer
-            new TextureLoader().load('resources/textures/clouds/c2.jpg'),
-            new TextureLoader().load('resources/textures/clouds/c3.jpg'),
-            new TextureLoader().load('resources/textures/clouds/c4.jpg'),
-            new TextureLoader().load('resources/textures/clouds/c5.jpg')
-
-        ];
-        */
-    /*
-    var cloudtexture = new TextureLoader().load('resources/textures/clouds/cloud10.png');
-
-    var randomTexture = Math.floor(Math.random() * 4);
-    var material = new SpriteMaterial({
-        map: cloudtexture,
-        transparent: true,
-        opacity: 3.0,
-        side: DoubleSide
-    });
-    var skyPlane = new Sprite(material);
-
-    //Positions- plasser litt tilfeldig
-    var pX = Math.random() * 1000 - 500;
-    var pZ = Math.random() * 1000 - 500;
-    var pY = Math.random() * 50 + 100;
-    if(i < 2){
-        pX = 185;
-        pY = 100;
-        pZ = 185;
-    }
-    var s1 = 50;
-    var s2 = 50;
-
-    //Set positions and scale
-    skyPlane.position.set(pX, pY, pZ);
-    skyPlane.scale.set(s1, s2);
-
-
-    //Add to scene
-    scene.add(skyPlane);
-}
-}*/
-
-    var lag = []
+    var skyTab = []
     for (let i = 0; i < 100; i++) {
         if(i == 0){
             var sky = generateBillboardClouds(true);
         } else {
             var sky = generateBillboardClouds(false);
         }
-        lag.push(sky);
-    }
-
-    function animateSky(layer) {
-        for (let j = 0; j < lag.length; j++) {
-            lag[j].material.rotation += 0.001;
-        }
+        skyTab.push(sky);
+        scene.add(sky);
     }
 
     //smoke
-    let textureSmoke = new TextureLoader().load('resources/textures/smoke2.png');
-            let smokeArray = new Array();
-
-            let smokeMaterial = new SpriteMaterial({
-                map: textureSmoke,
-                transparent: true,
-                opacity: 0.1,
-                side: DoubleSide
-            });
-
-            for (let p = 0, l = 100; p < l; p++) {
-                let particle = new Sprite(smokeMaterial);
-
-                particle.position.set(
-                    Math.random() * 20 - 140,
-                    Math.random() * 100 + 50,
-                    Math.random()* 20 - 90
-                );
-                particle.scale.set(
-                    20,
-                    20
-                )
-                smokeArray.push(particle);
-
-                //particle.rotation.z = Math.random() * 360;
-                scene.add(particle);
-            };
-
-    //let particleSystem = smoke();
-    //scene.add(particleSystem);
-
-
-    function animateSmoke(){
-       for (let i = 0, l = 100; i<l; i++){
-           smokeArray[i].position.setY(smokeArray[i].position.y + 0.05);
-           if(smokeArray[i].position.y > 150){
-               smokeArray[i].position.setY(45);
-           }
-       }
+    let roykTab = [];
+    for (let p = 0, l = 100; p < l; p++) {
+        let royk = generateSmoke();
+        roykTab.push(royk);
+        scene.add(royk);
     }
 
 
-        let icegeo = new PlaneGeometry(24, 24, 32, 32);
-        let icemat = new MeshPhongMaterial({map: new TextureLoader().load('resources/textures/iceTexture.jpg')});
-        let ice = new Mesh(icegeo, icemat);
-        ice.rotation.x = - Math.PI/2;
-        ice.position.set(188, 2.2, 178);
 
-        scene.add(ice);
+    let ice = generateIce();
+    scene.add(ice);
 
-        let snowArray = new Array();
-        let textureSnow = new TextureLoader().load('resources/textures/snowTexture.png');
-        let snowMaterial = new SpriteMaterial({
-            map: textureSnow,
-            transparent: true,
-            opacity: 0.6,
-            side: DoubleSide
-        });
-        for(let i = 0; i < 100; i++) {
-            var snow = new Sprite(snowMaterial);
-            snow.position.set(
-                Math.random() * 20 +175,
-                Math.random() * 80 + 5,
-                Math.random() * 20 +175
-            );
-            snow.scale.set(
-                10,
-                10
-            )
-            snowArray.push(snow);
-            scene.add(snow)
-        }
-
-
-    function animateSnow(){
-        for (let i = 0, l = 100; i<l; i++){
-            snowArray[i].position.setX(snowArray[i].position.x + ((Math.random()/10) - 0.05));
-            snowArray[i].position.setY(snowArray[i].position.y - (Math.random()/10));
-            snowArray[i].position.setZ(snowArray[i].position.z + ((Math.random()/10) - 0.05));
-            if(snowArray[i].position.y < 5){
-                snowArray[i].position.set(Math.random() * 20 + 175, 80, Math.random() * 20 + 175);
-            }
-        }
+    let snoTab = [];
+    for(let i = 0; i < 100; i++) {
+        let sno = generateSno();
+        snoTab.push(sno);
+        scene.add(sno);
     }
+
+
 
     /**
      * Adds a rock with bump mapping
@@ -692,10 +575,26 @@ async function main() {
         // Apply rotation to the orbit node for the sun and moon
         centerOrbitNode.rotation.x += 0.0015;
 
-        animateSmoke();
-        animateSnow();
-        animateSky(lag);
+        animateSmoke(roykTab);
+        animateSnow(snoTab);
+        animateSky(skyTab);
 
+
+        const newPosition = curve.getPoint(fraction);
+        //const tangent = curve.getTangent(fraction);
+        skip.position.copy(newPosition);
+        //axis.crossVectors(up, tangent).normalize();
+        //var zz = new Vector3(0,1,0);
+        //var angle = Math.atan2(tangent.x, tangent.y);
+        //const radians = Math.acos(up.dot(tangent));
+
+        //skip.quaternion.setFromAxisAngle(zz, angle);
+        skip.rotation.z = Math.atan2(curve.getPoint(fraction + 0.001).x - skip.position.x,
+            curve.getPoint(fraction + 0.001).y - skip.position.y);
+        fraction +=0.001;
+        if(fraction > 1){
+            fraction = 0;
+        }
 
         // render scene:
         renderer.render(scene, camera);
