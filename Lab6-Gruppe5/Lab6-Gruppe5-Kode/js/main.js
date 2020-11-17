@@ -18,7 +18,7 @@ import {
     SpriteMaterial,
     SphereGeometry,
     Object3D,
-    Group
+    Group, MeshBasicMaterial, DirectionalLight, OrthographicCamera
 } from './lib/three.module.js';
 
 import {Water} from '../js/objects/Water.js';
@@ -125,18 +125,21 @@ async function main() {
      * We are using the async/await language constructs of Javascript:
      *  - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function
      */
-    const sunLight = new PointLight(0xfdfbd3, 1.0);
+    const sunLight = new DirectionalLight(0xfdfbd3, 0.5);
     const moonLight = new PointLight(0xffffff, 0.3);
+    const sunLight2 = new PointLight(0xfdfbd3, 0.5);
 
     /**
      * Add shadow from the 2 lights to be used on objects that will be
      * projected onto the terrain
      */
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.height = 4096;
-    sunLight.shadow.mapSize.width = 4096;
-    sunLight.shadow.camera.near = 0.1;
-    sunLight.shadow.camera.far = 3000;
+    sunLight.shadow.mapSize.height = 8192;
+    sunLight.shadow.mapSize.width = 8192;
+    //sunLight.shadow.camera.near = 0.1;
+    //sunLight.shadow.camera.far = 3000;
+    sunLight.shadow.camera = new OrthographicCamera(-10000, 10000, 10000, -10000, 1, 20000,)
+    sunLight.shadow.camera.zoom = 30;
 
     moonLight.castShadow = true;
     moonLight.shadow.mapSize.height = 4096;
@@ -144,6 +147,7 @@ async function main() {
     moonLight.shadow.camera.near = 0.1;
     moonLight.shadow.camera.far = 3000;
 
+    sun.add(sunLight2);
     sun.add(sunLight);
     moon.add(moonLight);
     moon.visible = false;
@@ -503,8 +507,9 @@ async function main() {
      * and then draw from the 'inside-out'
      */
     let sphereGeometry = new SphereGeometry(1500, 64, 64);
-    let skyTexture = new TextureLoader().load('resources/textures/sky.png');
-    let sphereMaterial = new MeshPhongMaterial( {map: skyTexture, color: 0x87ceeb, side: BackSide});
+    //let skyTexture = new TextureLoader().load('resources/textures/sky.png');
+    let sphereMaterial = new MeshBasicMaterial({color:0x53CCE7, side: BackSide});
+
     let skyBox = new Mesh(sphereGeometry, sphereMaterial);
 
     scene.add(skyBox);
